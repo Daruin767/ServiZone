@@ -1,0 +1,373 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
+import 'users/users_management_screen.dart';
+import 'providers/providers_management_screen.dart';
+import 'posts/posts_management_screen.dart';
+import 'reports/reports_dashboard_screen.dart';
+import 'support/support_center_screen.dart';
+import 'settings/admin_settings_screen.dart';
+
+class AdminDashboardScreen extends StatefulWidget {
+  final String? userName;
+  const AdminDashboardScreen({super.key, this.userName});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  String _displayName = 'Usuario';
+  int _selected = 0;
+  bool _menuVisible = true;
+
+  final List<_MenuItem> _items = const [
+    _MenuItem('Gestión Usuarios', Icons.group_rounded, Color(0xFF2E7D32)),
+    _MenuItem('Gestión Proveedores', Icons.business_rounded, Color(0xFFE65100)),
+    _MenuItem('Publicaciones', Icons.article_rounded, Color(0xFF7B1FA2)),
+    _MenuItem('Reportes', Icons.analytics_rounded, Color(0xFFC2185B)),
+    _MenuItem('Soporte', Icons.support_agent_rounded, Color(0xFFD32F2F)),
+    _MenuItem('Configuración', Icons.settings_rounded, Color(0xFF455A64)),
+  ];
+
+  late final List<Widget> _screens = [
+    const UsersManagementScreen(),
+    const ProvidersManagementScreen(),
+    const PostsManagementScreen(),
+    const ReportsDashboardScreen(),
+    const SupportCenterScreen(),
+    const AdminSettingsScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(-0.3, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
+    _fadeController.forward();
+    _slideController.forward();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _displayName = widget.userName ?? prefs.getString('user_name') ?? 'Usuario';
+      });
+    } catch (e) {
+      setState(() => _displayName = 'Usuario');
+    }
+  }
+
+  void _cerrarSesion(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('¿Cerrar sesión?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Se cerrará tu sesión de administrador'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: lightGray,
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (_menuVisible)
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Container(
+                    width: 280,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(4, 0))],
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 32),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(colors: [primaryBlue, lightBlue]),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: primaryBlue.withOpacity(0.3), blurRadius: 15)],
+                                ),
+                                child: const Icon(Icons.admin_panel_settings_rounded, size: 40, color: Colors.white),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(_displayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                                child: const Text('Administrador', style: TextStyle(color: primaryBlue, fontSize: 12, fontWeight: FontWeight.w600)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 24), color: Colors.grey.shade200),
+                        const SizedBox(height: 24),
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: _items.length,
+                            itemBuilder: (context, i) {
+                              final item = _items[i];
+                              final selected = i == _selected;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(12),
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      setState(() {
+                                        _selected = i;
+                                        if (MediaQuery.of(context).size.width < 800) _menuVisible = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                      decoration: BoxDecoration(
+                                        color: selected ? primaryBlue.withOpacity(0.1) : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: selected ? item.color : item.color.withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(item.icon, size: 20, color: selected ? Colors.white : item.color),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Text(
+                                              item.label,
+                                              style: TextStyle(
+                                                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                                                color: selected ? primaryBlue : darkGray,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          ),
+                                          if (selected)
+                                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: primaryBlue, shape: BoxShape.circle)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _cerrarSesion(context),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                                    SizedBox(width: 12),
+                                    Text('Cerrar Sesión', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            Expanded(
+              child: Column(
+                children: [
+                  Container(
+                    height: 80,
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        if (!_menuVisible)
+                          Container(
+                            margin: const EdgeInsets.only(left: 20),
+                            child: IconButton(
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                setState(() => _menuVisible = true);
+                              },
+                              icon: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                                child: Icon(Icons.menu_rounded, color: primaryBlue),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Text(
+                              _items[_selected].label,
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(right: 20),
+                          child: Row(
+                            children: [
+                              _buildHeaderIndicator(icon: Icons.notifications_rounded, count: 3, color: Colors.orange),
+                              const SizedBox(width: 16),
+                              _buildHeaderIndicator(icon: Icons.message_rounded, count: 7, color: primaryBlue),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: Colors.grey.shade200),
+                  Expanded(
+                    child: Container(
+                      color: lightGray,
+                      child: _menuVisible && MediaQuery.of(context).size.width < 800
+                          ? FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
+                                      child: Icon(Icons.dashboard_rounded, size: 50, color: primaryBlue),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    const Text('Panel de Administración', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray)),
+                                    const SizedBox(height: 12),
+                                    const Text('Selecciona una opción del menú lateral', style: TextStyle(color: mediumGray)),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: _screens[_selected],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderIndicator({required IconData icon, required int count, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+      child: Stack(
+        children: [
+          Icon(icon, color: color, size: 24),
+          if (count > 0)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                child: Text(
+                  count > 99 ? '99+' : count.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuItem {
+  final String label;
+  final IconData icon;
+  final Color color;
+  const _MenuItem(this.label, this.icon, this.color);
+}
