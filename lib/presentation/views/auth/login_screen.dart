@@ -201,6 +201,13 @@ class _LoginScreenState extends State<LoginScreen>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -209,12 +216,27 @@ class _LoginScreenState extends State<LoginScreen>
                         width: 50,
                         height: 50,
                         child: CircularProgressIndicator(
+                          strokeWidth: 3,
                           valueColor: AlwaysStoppedAnimation<Color>(primaryBlue),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Text('Validando credenciales',
-                          style: TextStyle(color: darkGray, fontWeight: FontWeight.w600)),
+                      Text(
+                        'Validando credenciales',
+                        style: TextStyle(
+                          color: darkGray,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Iniciando sesión...',
+                        style: TextStyle(
+                          color: mediumGray,
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -237,16 +259,47 @@ class _LoginScreenState extends State<LoginScreen>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 60),
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.green,
+                          size: 40,
+                        ),
+                      ),
                       const SizedBox(height: 20),
-                      const Text('¡Inicio Exitoso!',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
-                      const Text('Bienvenido a ServiZone',
-                          style: TextStyle(color: mediumGray)),
+                      const Text(
+                        '¡Inicio Exitoso!',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: darkGray,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Bienvenido a ServiZone',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: mediumGray,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -270,16 +323,48 @@ class _LoginScreenState extends State<LoginScreen>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: Colors.red, size: 60),
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.error_outline_rounded,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
                       const SizedBox(height: 20),
-                      const Text('Error de autenticación',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
+                      const Text(
+                        'Error de autenticación',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: darkGray,
+                        ),
+                      ),
                       const SizedBox(height: 12),
-                      Text(_errorMessage, textAlign: TextAlign.center, style: TextStyle(color: mediumGray)),
+                      Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: mediumGray,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -300,15 +385,28 @@ class _LoginScreenState extends State<LoginScreen>
     return TextFormField(
       controller: controller,
       obscureText: isPassword && !_isPasswordVisible,
+      keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
       validator: validator,
+      style: const TextStyle(
+        fontSize: 16,
+        color: darkGray,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon, color: primaryBlue),
+        prefixIcon: Icon(icon, color: primaryBlue, size: 22),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility, color: mediumGray),
-                onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  color: mediumGray,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
               )
             : null,
         filled: true,
@@ -321,6 +419,13 @@ class _LoginScreenState extends State<LoginScreen>
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primaryBlue, width: 2),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        labelStyle: TextStyle(color: mediumGray, fontSize: 14),
+        hintStyle: TextStyle(color: mediumGray.withOpacity(0.7), fontSize: 14),
       ),
     );
   }
@@ -340,14 +445,24 @@ class _LoginScreenState extends State<LoginScreen>
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           side: BorderSide(color: Colors.grey.shade300, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: iconColor, size: 22),
             const SizedBox(width: 12),
-            Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: darkGray,
+              ),
+            ),
           ],
         ),
       ),
@@ -369,58 +484,105 @@ class _LoginScreenState extends State<LoginScreen>
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // Logo ServiZone mejorado
                         Container(
                           margin: const EdgeInsets.only(bottom: 40),
                           child: Column(
                             children: [
                               RichText(
                                 text: const TextSpan(
-                                  style: TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
+                                  style: TextStyle(
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1,
+                                  ),
                                   children: [
-                                    TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
-                                    TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
+                                    TextSpan(
+                                      text: "Servi",
+                                      style: TextStyle(color: primaryBlue),
+                                    ),
+                                    TextSpan(
+                                      text: "Zone",
+                                      style: TextStyle(color: darkGray),
+                                    ),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text('Tu plataforma de servicios',
-                                  style: TextStyle(fontSize: 16, color: mediumGray)),
+                              Text(
+                                'Tu plataforma de servicios',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: mediumGray,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
+
+                        // Formulario principal
                         Container(
                           constraints: const BoxConstraints(maxWidth: 400),
                           padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20)],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 20,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Form(
                             key: _formKey,
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Iniciar Sesión",
-                                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: darkGray)),
+                                const Text(
+                                  "Iniciar Sesión",
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: darkGray,
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
-                                Text('Accede a tu cuenta',
-                                    style: TextStyle(fontSize: 16, color: mediumGray)),
+                                Text(
+                                  'Accede a tu cuenta',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: mediumGray,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
                                 const SizedBox(height: 32),
+
+                                // Campo de correo
                                 _buildTextField(
                                   controller: correoController,
                                   label: "Correo electrónico",
                                   hint: "ejemplo@correo.com",
                                   icon: Icons.email_rounded,
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return 'Campo requerido';
+                                    if (value == null || value.isEmpty) {
+                                      return 'Por favor ingresa tu correo';
+                                    }
                                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                      return 'Correo inválido';
+                                      return 'Ingresa un correo válido';
                                     }
                                     return null;
                                   },
                                 ),
+
                                 const SizedBox(height: 20),
+
+                                // Campo de contraseña
                                 _buildTextField(
                                   controller: passwordController,
                                   label: "Contraseña",
@@ -428,65 +590,159 @@ class _LoginScreenState extends State<LoginScreen>
                                   icon: Icons.lock_rounded,
                                   isPassword: true,
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return 'Campo requerido';
-                                    if (value.length < 6) return 'Mínimo 6 caracteres';
+                                    if (value == null || value.isEmpty) {
+                                      return 'Por favor ingresa tu contraseña';
+                                    }
+                                    if (value.length < 6) {
+                                      return 'La contraseña debe tener al menos 6 caracteres';
+                                    }
                                     return null;
                                   },
                                 ),
+
                                 const SizedBox(height: 32),
-                                SizedBox(
+
+                                // Botón principal
+                                Container(
                                   width: double.infinity,
                                   height: 54,
                                   child: ElevatedButton(
                                     onPressed: loading ? null : _validateForm,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryBlue,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 0,
+                                      shadowColor: primaryBlue.withOpacity(0.3),
+                                    ),
                                     child: loading
                                         ? const SizedBox(
                                             width: 22,
                                             height: 22,
-                                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2.5,
+                                            ),
                                           )
-                                        : const Text("Iniciar Sesión", style: TextStyle(fontSize: 16)),
+                                        : const Text(
+                                            "Iniciar Sesión",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                   ),
                                 ),
+
+                                // ----- BOTONES DE ACCESO DIRECTO (SOLO PRUEBA) -----
                                 const SizedBox(height: 24),
-                                // Después del botón de "Iniciar Sesión"
-const SizedBox(height: 16),
-ElevatedButton(
-  onPressed: () {
-    Navigator.pushNamed(context, AppRoutes.adminDashboard);
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.orange,
-    minimumSize: const Size(double.infinity, 48),
-  ),
-  child: const Text('Acceso Admin (Demo)'),
-),
-
-
-                                Row(
+                                const Text(
+                                  'Acceso directo (modo prueba)',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: darkGray,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
                                   children: [
-                                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      child: Text('O continúa con', style: TextStyle(color: mediumGray, fontSize: 14)),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.adminDashboard),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: primaryBlue,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      ),
+                                      child: const Text('Admin'),
                                     ),
-                                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.clientHome),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      ),
+                                      child: const Text('Cliente'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.providerHome),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      ),
+                                      child: const Text('Proveedor'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.guestHome),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.purple,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      ),
+                                      child: const Text('Invitado'),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 24),
+                                // ------------------------------------------------
+
+                                // Divisor
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        'O continúa con',
+                                        style: TextStyle(
+                                          color: mediumGray,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                // Botones sociales
                                 _buildSocialButton(
                                   text: "Continuar con Google",
                                   icon: Icons.g_mobiledata_rounded,
                                   iconColor: Colors.red,
                                   onPressed: () {},
                                 ),
+
                                 _buildSocialButton(
                                   text: "Continuar con Facebook",
                                   icon: Icons.facebook_rounded,
                                   iconColor: Colors.blue[800]!,
                                   onPressed: () {},
                                 ),
+
                                 const SizedBox(height: 24),
+
+                                // Botón registrarse
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
@@ -495,22 +751,36 @@ ElevatedButton(
                                     child: RichText(
                                       text: TextSpan(
                                         text: '¿No tienes cuenta? ',
-                                        style: TextStyle(color: mediumGray, fontSize: 15),
+                                        style: TextStyle(
+                                          color: mediumGray,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                         children: [
                                           TextSpan(
                                             text: 'Regístrate',
-                                            style: TextStyle(color: primaryBlue, fontWeight: FontWeight.w600),
+                                            style: TextStyle(
+                                              color: primaryBlue,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ),
+
                                 const SizedBox(height: 20),
+
+                                // Términos y condiciones
                                 Text(
                                   "Al continuar, aceptas nuestros Términos de servicio y Política de privacidad",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 12, color: mediumGray, height: 1.4),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: mediumGray,
+                                    height: 1.4,
+                                  ),
                                 ),
                               ],
                             ),
@@ -523,6 +793,8 @@ ElevatedButton(
               ),
             ),
           ),
+
+          // Pantallas de estado
           _buildLoadingScreen(),
           _buildSuccessScreen(),
           _buildErrorScreen(),

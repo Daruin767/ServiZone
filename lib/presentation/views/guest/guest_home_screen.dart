@@ -3,16 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
-class HomeClientScreen extends StatefulWidget {
-  const HomeClientScreen({super.key});
+class GuestHomeScreen extends StatefulWidget {
+  const GuestHomeScreen({super.key});
 
   @override
-  State<HomeClientScreen> createState() => _HomeClientScreenState();
+  State<GuestHomeScreen> createState() => _GuestHomeScreenState();
 }
 
-class _HomeClientScreenState extends State<HomeClientScreen>
+class _GuestHomeScreenState extends State<GuestHomeScreen>
     with TickerProviderStateMixin {
-  int _currentIndex = 1; // Por defecto en Servicios (índice 1)
+  int _currentIndex = 1; // Por defecto en Servicios
   String searchQuery = "";
 
   late AnimationController _fadeController;
@@ -20,6 +20,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
+  // Mismas categorías que el cliente
   final List<Map<String, dynamic>> categories = [
     {
       "title": "Servi Favor",
@@ -94,13 +95,38 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     super.dispose();
   }
 
+  // Muestra un diálogo para iniciar sesión (usado en todas las acciones)
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Acceso restringido'),
+        content: const Text('Para realizar esta acción debes iniciar sesión o registrarte.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushNamed(context, AppRoutes.login);
+            },
+            child: const Text('Iniciar Sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Lista de pantallas: [Actividad, Servicios, Reservas, Cuenta]
+    // Mismas pantallas que el cliente, pero con acciones bloqueadas
     final List<Widget> screens = [
       _buildActivityScreen(),
       _buildSolicitudScreen(),
-      _buildReservasScreen(), // Nueva pantalla de reservas
+      _buildReservasScreen(),
       _buildAccountScreen(),
     ];
 
@@ -120,6 +146,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         currentIndex: _currentIndex,
         onTap: (index) {
           HapticFeedback.lightImpact();
+          // Permitir cambiar de pestaña sin restricción
           setState(() => _currentIndex = index);
         },
         backgroundColor: Colors.transparent,
@@ -132,14 +159,14 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: "Actividad"),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"), // Nuevo
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
         ],
       ),
     );
   }
 
-  // ---------- Pantalla Actividad (sin cambios) ----------
+  // Pantalla Actividad (solo visual, sin acciones)
   Widget _buildActivityScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -163,11 +190,11 @@ class _HomeClientScreenState extends State<HomeClientScreen>
               const Text('No hay actividad reciente',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: darkGray)),
               const SizedBox(height: 12),
-              const Text('Tus solicitudes aparecerán aquí', style: TextStyle(color: mediumGray)),
+              const Text('Inicia sesión para ver tu historial', style: TextStyle(color: mediumGray)),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () => setState(() => _currentIndex = 1),
-                child: const Text('Explorar Servicios'),
+                onPressed: _showLoginRequiredDialog,
+                child: const Text('Iniciar Sesión'),
               ),
             ],
           ),
@@ -176,7 +203,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Servicios (sin cambios) ----------
+  // Pantalla Servicios (solo visual, acciones bloqueadas)
   Widget _buildSolicitudScreen() {
     final filteredCategories = categories
         .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
@@ -207,7 +234,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                           ],
                         ),
                       ),
-                      const Text('Tu plataforma de servicios', style: TextStyle(color: mediumGray)),
+                      const Text('Explora como invitado', style: TextStyle(color: mediumGray)),
                     ],
                   ),
                 ),
@@ -224,7 +251,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                           right: 0, top: 0, child: CircleAvatar(radius: 4, backgroundColor: Colors.red)),
                     ],
                   ),
-                  onPressed: () {},
+                  onPressed: _showLoginRequiredDialog, // Bloqueado
                 ),
               ),
             ],
@@ -236,7 +263,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: _showLoginRequiredDialog, // Bloqueado
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -262,7 +289,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                                 const Text('Agregar dirección',
                                     style: TextStyle(fontWeight: FontWeight.w600, color: darkGray)),
                                 const SizedBox(height: 2),
-                                Text('Para servicios más precisos', style: TextStyle(color: mediumGray, fontSize: 12)),
+                                Text('Inicia sesión para agregar', style: TextStyle(color: mediumGray, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -326,13 +353,10 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
+  // Tarjeta de categoría con acción bloqueada
   Widget _buildCategoryCard(Map<String, dynamic> category) {
     return GestureDetector(
-      onTap: () {
-        // Acción al tocar categoría (por ejemplo, navegar a detalles)
-        HapticFeedback.mediumImpact();
-        // Aquí puedes navegar a la pantalla de servicios de esa categoría
-      },
+      onTap: _showLoginRequiredDialog, // Bloqueado
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: category["gradient"]),
@@ -362,7 +386,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- NUEVA PANTALLA DE RESERVAS ----------
+  // Pantalla Reservas (solo visual)
   Widget _buildReservasScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -384,13 +408,13 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             ),
             const SizedBox(height: 10),
             const Text(
-              "Las reservas que realices aparecerán aquí",
+              "Inicia sesión para gestionar tus reservas",
               style: TextStyle(color: mediumGray),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () => setState(() => _currentIndex = 1),
-              child: const Text("Explorar servicios"),
+              onPressed: _showLoginRequiredDialog,
+              child: const Text("Iniciar Sesión"),
             ),
           ],
         ),
@@ -398,7 +422,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Cuenta (sin cambios) ----------
+  // Pantalla Cuenta (solo visual)
   Widget _buildAccountScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -410,11 +434,11 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             const SizedBox(height: 20),
             const Text('Perfil de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text('Aquí puedes ver y editar tu perfil', style: TextStyle(color: mediumGray)),
+            const Text('Inicia sesión para ver tu perfil', style: TextStyle(color: mediumGray)),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.adminDashboard),
-              child: const Text('Ir a Admin (demo)'),
+              onPressed: _showLoginRequiredDialog,
+              child: const Text('Iniciar Sesión'),
             ),
           ],
         ),
