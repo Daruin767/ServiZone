@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
 
 class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
@@ -105,7 +107,6 @@ class _DashboardTab extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray),
             ),
             const SizedBox(height: 16),
-            // Lista de servicios (placeholder)
             ...List.generate(3, (index) => _buildServiceCard(index)),
             const SizedBox(height: 24),
             const Text(
@@ -113,7 +114,6 @@ class _DashboardTab extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray),
             ),
             const SizedBox(height: 16),
-            // Lista de reservas (placeholder)
             ...List.generate(2, (index) => _buildBookingCard(index)),
           ],
         ),
@@ -255,6 +255,14 @@ class _BookingsTab extends StatelessWidget {
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab();
 
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,10 +272,26 @@ class _ProfileTab extends StatelessWidget {
         backgroundColor: primaryBlue,
         foregroundColor: Colors.white,
       ),
-      body: const Center(
-        child: Text(
-          'Configuración de tu perfil',
-          style: TextStyle(color: mediumGray),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.business_center, size: 80, color: primaryBlue),
+            const SizedBox(height: 20),
+            const Text('Proveedor Demo', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            const Text('proveedor@servizone.com', style: TextStyle(color: mediumGray)),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () => _logout(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              child: const Text('Cerrar Sesión'),
+            ),
+          ],
         ),
       ),
     );

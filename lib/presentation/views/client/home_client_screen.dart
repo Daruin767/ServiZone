@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
@@ -94,13 +95,22 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     super.dispose();
   }
 
+  Future<void> _logout() async {
+    // Limpiar SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    // Navegar al login
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Lista de pantallas: [Actividad, Servicios, Reservas, Cuenta]
     final List<Widget> screens = [
       _buildActivityScreen(),
       _buildSolicitudScreen(),
-      _buildReservasScreen(), // Nueva pantalla de reservas
+      _buildReservasScreen(),
       _buildAccountScreen(),
     ];
 
@@ -132,14 +142,13 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: "Actividad"),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"), // Nuevo
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
         ],
       ),
     );
   }
 
-  // ---------- Pantalla Actividad (sin cambios) ----------
   Widget _buildActivityScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -176,7 +185,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Servicios (sin cambios) ----------
   Widget _buildSolicitudScreen() {
     final filteredCategories = categories
         .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
@@ -329,7 +337,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   Widget _buildCategoryCard(Map<String, dynamic> category) {
     return GestureDetector(
       onTap: () {
-        // Acción al tocar categoría (por ejemplo, navegar a detalles)
         HapticFeedback.mediumImpact();
         // Aquí puedes navegar a la pantalla de servicios de esa categoría
       },
@@ -362,7 +369,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- NUEVA PANTALLA DE RESERVAS ----------
   Widget _buildReservasScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -398,7 +404,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Cuenta (sin cambios) ----------
   Widget _buildAccountScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -415,6 +420,16 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, AppRoutes.adminDashboard),
               child: const Text('Ir a Admin (demo)'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _logout,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              child: const Text('Cerrar Sesión'),
             ),
           ],
         ),

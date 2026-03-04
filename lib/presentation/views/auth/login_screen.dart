@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
-import 'package:servizone_app/data/providers/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,9 +29,24 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  static const String _baseUrl = 'http://10.1.117.214:7000';
-  static const String _apiEndpoint = '/api/Auth/login';
-  String get _apiUrl => '$_baseUrl$_apiEndpoint';
+  // Usuarios quemados para autenticación local
+  final Map<String, Map<String, String>> _users = {
+    'admin@servizone.com': {
+      'password': '123456',
+      'role': 'admin',
+      'name': 'Administrador',
+    },
+    'cliente@servizone.com': {
+      'password': '123456',
+      'role': 'client',
+      'name': 'Cliente Demo',
+    },
+    'proveedor@servizone.com': {
+      'password': '123456',
+      'role': 'provider',
+      'name': 'Proveedor Demo',
+    },
+  };
 
   @override
   void initState() {
@@ -108,68 +119,56 @@ class _LoginScreenState extends State<LoginScreen>
     }
     setState(() => loading = true);
 
-    try {
-      final url = Uri.parse(_apiUrl);
-      final body = {
-        "Correo": correoController.text.trim(),
-        "Password": passwordController.text.trim(),
-      };
-      final response = await http
-          .post(url,
-              headers: {"Content-Type": "application/json"},
-              body: jsonEncode(body))
-          .timeout(const Duration(seconds: 10));
+    // Simular retardo de red
+    await Future.delayed(const Duration(seconds: 1));
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        try {
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
-          final String? token = responseData['token']?.toString();
-          final Map<String, dynamic>? usuarioObj = responseData['usuario'] as Map<String, dynamic>?;
-          final String? correo = usuarioObj?['correo'] ?? usuarioObj?['email'];
-          final String? nombre = usuarioObj?['nombre'] ?? usuarioObj?['name'];
+    final email = correoController.text.trim();
+    final password = passwordController.text.trim();
 
-          if (token != null && token.isNotEmpty) {
-            await _saveUserData(token, correo, nombre);
-            setState(() {
-              _showLoadingScreen = false;
-              _showSuccessScreen = true;
-            });
-            Future.delayed(const Duration(seconds: 2), () {
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
-            });
-          } else {
-            _showError('Error: No se recibió token de autenticación');
-          }
-        } catch (jsonError) {
-          _showError('Error procesando respuesta del servidor');
-        }
-      } else {
-        try {
-          final Map<String, dynamic> errorData = jsonDecode(response.body);
-          String message = errorData['message'] ?? 'Credenciales incorrectas';
-          _showError(message);
-        } catch (_) {
-          _showError('Error del servidor (${response.statusCode})');
-        }
-      }
-    } on SocketException {
-      _showError('Error de conexión. Verifica tu red.');
-    } on Exception {
-      _showError('Error inesperado');
-    } finally {
+    if (_users.containsKey(email) && _users[email]!['password'] == password) {
+      // Autenticación exitosa
+      final userData = _users[email]!;
+      final role = userData['role']!;
+      final name = userData['name']!;
+
+      // Guardar datos en SharedPreferences (opcional)
+      await _saveUserData(email, name, role);
+
       setState(() {
-        loading = false;
         _showLoadingScreen = false;
+        _showSuccessScreen = true;
       });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        // Redirigir según el rol
+        switch (role) {
+          case 'admin':
+            Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+            break;
+          case 'client':
+            Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
+            break;
+          case 'provider':
+            Navigator.pushReplacementNamed(context, AppRoutes.providerHome);
+            break;
+          default:
+            Navigator.pushReplacementNamed(context, AppRoutes.guestHome);
+        }
+      });
+    } else {
+      // Error de autenticación
+      _showError('Credenciales incorrectas');
     }
+
+    setState(() => loading = false);
   }
 
-  Future<void> _saveUserData(String token, String? correo, String? nombre) async {
+  Future<void> _saveUserData(String email, String name, String role) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', token);
-      if (correo != null) await prefs.setString('user_email', correo);
-      if (nombre != null) await prefs.setString('user_name', nombre);
+      await prefs.setString('user_email', email);
+      await prefs.setString('user_name', name);
+      await prefs.setString('user_role', role);
       await prefs.setBool('is_logged_in', true);
     } catch (e) {
       print('Error guardando datos: $e');
@@ -486,7 +485,7 @@ class _LoginScreenState extends State<LoginScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo ServiZone mejorado
+                        // Logo ServiZone
                         Container(
                           margin: const EdgeInsets.only(bottom: 40),
                           child: Column(
@@ -602,7 +601,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                                 const SizedBox(height: 32),
 
-                                // Botón principal
+                                // Botón principal de inicio de sesión
                                 Container(
                                   width: double.infinity,
                                   height: 54,
@@ -636,63 +635,25 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 ),
 
-                                // ----- BOTONES DE ACCESO DIRECTO (SOLO PRUEBA) -----
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Acceso directo (modo prueba)',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: darkGray,
+                                const SizedBox(height: 16),
+
+                                // Botón para continuar como invitado
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(context, AppRoutes.guestHome);
+                                    },
+                                    child: const Text(
+                                      'Continuar como invitado',
+                                      style: TextStyle(
+                                        color: primaryBlue,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  alignment: WrapAlignment.center,
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.adminDashboard),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: primaryBlue,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      ),
-                                      child: const Text('Admin'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.clientHome),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      ),
-                                      child: const Text('Cliente'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.providerHome),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      ),
-                                      child: const Text('Proveedor'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.guestHome),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.purple,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      ),
-                                      child: const Text('Invitado'),
-                                    ),
-                                  ],
-                                ),
+
                                 const SizedBox(height: 24),
-                                // ------------------------------------------------
 
                                 // Divisor
                                 Row(
@@ -730,19 +691,35 @@ class _LoginScreenState extends State<LoginScreen>
                                   text: "Continuar con Google",
                                   icon: Icons.g_mobiledata_rounded,
                                   iconColor: Colors.red,
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    // Sin funcionalidad por ahora
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Funcionalidad no disponible'),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  },
                                 ),
 
                                 _buildSocialButton(
                                   text: "Continuar con Facebook",
                                   icon: Icons.facebook_rounded,
                                   iconColor: Colors.blue[800]!,
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    // Sin funcionalidad por ahora
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Funcionalidad no disponible'),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  },
                                 ),
 
                                 const SizedBox(height: 24),
 
-                                // Botón registrarse
+                                // Enlace a registro
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
@@ -794,7 +771,7 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
 
-          // Pantallas de estado
+          // Pantallas de estado (loading, éxito, error)
           _buildLoadingScreen(),
           _buildSuccessScreen(),
           _buildErrorScreen(),
