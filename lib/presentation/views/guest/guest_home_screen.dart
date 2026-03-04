@@ -95,7 +95,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     super.dispose();
   }
 
-  // Muestra un diálogo para iniciar sesión (usado en todas las acciones)
+  // Muestra un diálogo para iniciar sesión (usado en acciones que no son botones directos)
   void _showLoginRequiredDialog() {
     showDialog(
       context: context,
@@ -166,7 +166,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     );
   }
 
-  // Pantalla Actividad (solo visual, sin acciones)
+  // Pantalla Actividad (solo visual)
   Widget _buildActivityScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -193,7 +193,9 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               const Text('Inicia sesión para ver tu historial', style: TextStyle(color: mediumGray)),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _showLoginRequiredDialog,
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.login); // Navegación directa
+                },
                 child: const Text('Iniciar Sesión'),
               ),
             ],
@@ -251,7 +253,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                           right: 0, top: 0, child: CircleAvatar(radius: 4, backgroundColor: Colors.red)),
                     ],
                   ),
-                  onPressed: _showLoginRequiredDialog, // Bloqueado
+                  onPressed: _showLoginRequiredDialog, // Diálogo
                 ),
               ),
             ],
@@ -263,7 +265,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: InkWell(
-                    onTap: _showLoginRequiredDialog, // Bloqueado
+                    onTap: _showLoginRequiredDialog, // Diálogo
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -356,7 +358,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
   // Tarjeta de categoría con acción bloqueada
   Widget _buildCategoryCard(Map<String, dynamic> category) {
     return GestureDetector(
-      onTap: _showLoginRequiredDialog, // Bloqueado
+      onTap: _showLoginRequiredDialog, // Diálogo
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: category["gradient"]),
@@ -413,7 +415,9 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: _showLoginRequiredDialog,
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.login); // Navegación directa
+              },
               child: const Text("Iniciar Sesión"),
             ),
           ],
@@ -437,7 +441,9 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
             const Text('Inicia sesión para ver tu perfil', style: TextStyle(color: mediumGray)),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: _showLoginRequiredDialog,
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.login); // Navegación directa
+              },
               child: const Text('Iniciar Sesión'),
             ),
           ],
