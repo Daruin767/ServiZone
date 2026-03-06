@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
@@ -13,13 +14,38 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToLogin();
+    _checkSession();
   }
 
-  _navigateToLogin() async {
+  Future<void> _checkSession() async {
+    // Simular tiempo de carga
     await Future.delayed(const Duration(seconds: 2));
+
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
+
+    if (isLoggedIn) {
+      // Obtener el rol guardado
+      final role = prefs.getString('user_role') ?? '';
+      switch (role) {
+        case 'admin':
+          Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+          break;
+        case 'client':
+          Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
+          break;
+        case 'provider':
+          Navigator.pushReplacementNamed(context, AppRoutes.providerHome);
+          break;
+        default:
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+      }
+    } else {
+      // No hay sesión, ir al login
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
   }
 
   @override

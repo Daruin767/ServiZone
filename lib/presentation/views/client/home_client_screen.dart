@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
 
 class HomeClientScreen extends StatefulWidget {
   const HomeClientScreen({super.key});
@@ -96,10 +97,8 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   }
 
   Future<void> _logout() async {
-    // Limpiar SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    // Navegar al login
     if (mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
@@ -108,9 +107,8 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      _buildActivityScreen(),
-      _buildSolicitudScreen(),
       _buildReservasScreen(),
+      _buildSolicitudScreen(),
       _buildAccountScreen(),
     ];
 
@@ -140,51 +138,15 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: "Actividad"),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
         ],
       ),
     );
   }
 
-  Widget _buildActivityScreen() {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text("Historial de Solicitudes", style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
-                child: Icon(Icons.history_rounded, size: 40, color: primaryBlue),
-              ),
-              const SizedBox(height: 24),
-              const Text('No hay actividad reciente',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: darkGray)),
-              const SizedBox(height: 12),
-              const Text('Tus solicitudes aparecerán aquí', style: TextStyle(color: mediumGray)),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => setState(() => _currentIndex = 1),
-                child: const Text('Explorar Servicios'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
+  // ---------- Pantalla Servicios (sin "Agregar dirección") ----------
   Widget _buildSolicitudScreen() {
     final filteredCategories = categories
         .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
@@ -241,46 +203,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  child: InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 8)],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration:
-                                BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                            child: Icon(Icons.add_location_alt_rounded, color: primaryBlue),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Agregar dirección',
-                                    style: TextStyle(fontWeight: FontWeight.w600, color: darkGray)),
-                                const SizedBox(height: 2),
-                                Text('Para servicios más precisos', style: TextStyle(color: mediumGray, fontSize: 12)),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                // Campo de búsqueda (antes estaba el bloque de dirección, ahora eliminado)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextField(
@@ -369,6 +292,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
+  // ---------- Pantalla Reservas ----------
   Widget _buildReservasScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -404,36 +328,8 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
+  // ---------- Pantalla Cuenta ----------
   Widget _buildAccountScreen() {
-    return Scaffold(
-      backgroundColor: lightGray,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.person, size: 80, color: primaryBlue),
-            const SizedBox(height: 20),
-            const Text('Perfil de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Text('Aquí puedes ver y editar tu perfil', style: TextStyle(color: mediumGray)),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.adminDashboard),
-              child: const Text('Ir a Admin (demo)'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              ),
-              child: const Text('Cerrar Sesión'),
-            ),
-          ],
-        ),
-      ),
-    );
+    return ClientProfileScreen(onLogout: _logout);
   }
 }

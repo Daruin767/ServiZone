@@ -656,69 +656,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 const SizedBox(height: 24),
 
                                 // Divisor
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        height: 1,
-                                        color: Colors.grey.shade300,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      child: Text(
-                                        'O continúa con',
-                                        style: TextStyle(
-                                          color: mediumGray,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        height: 1,
-                                        color: Colors.grey.shade300,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 24),
-
-                                // Botones sociales
-                                _buildSocialButton(
-                                  text: "Continuar con Google",
-                                  icon: Icons.g_mobiledata_rounded,
-                                  iconColor: Colors.red,
-                                  onPressed: () {
-                                    // Sin funcionalidad por ahora
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Funcionalidad no disponible'),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  },
-                                ),
-
-                                _buildSocialButton(
-                                  text: "Continuar con Facebook",
-                                  icon: Icons.facebook_rounded,
-                                  iconColor: Colors.blue[800]!,
-                                  onPressed: () {
-                                    // Sin funcionalidad por ahora
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Funcionalidad no disponible'),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  },
-                                ),
-
-                                const SizedBox(height: 24),
-
+                                
                                 // Enlace a registro
                                 Center(
                                   child: TextButton(

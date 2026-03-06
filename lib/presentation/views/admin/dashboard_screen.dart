@@ -5,7 +5,7 @@ import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'users/users_management_screen.dart';
 import 'providers/providers_management_screen.dart';
-import 'posts/posts_management_screen.dart';
+
 import 'reports/reports_dashboard_screen.dart';
 import 'support/support_center_screen.dart';
 import 'settings/admin_settings_screen.dart';
@@ -32,7 +32,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   final List<_MenuItem> _items = const [
     _MenuItem('Gestión Usuarios', Icons.group_rounded, Color(0xFF2E7D32)),
     _MenuItem('Gestión Proveedores', Icons.business_rounded, Color(0xFFE65100)),
-    _MenuItem('Publicaciones', Icons.article_rounded, Color(0xFF7B1FA2)),
     _MenuItem('Reportes', Icons.analytics_rounded, Color(0xFFC2185B)),
     _MenuItem('Soporte', Icons.support_agent_rounded, Color(0xFFD32F2F)),
     _MenuItem('Configuración', Icons.settings_rounded, Color(0xFF455A64)),
@@ -41,7 +40,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   late final List<Widget> _screens = [
     const UsersManagementScreen(),
     const ProvidersManagementScreen(),
-    const PostsManagementScreen(),
     const ReportsDashboardScreen(),
     const SupportCenterScreen(),
     const AdminSettingsScreen(),

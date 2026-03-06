@@ -85,8 +85,19 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   Future<void> _crearCuenta() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Validar términos de forma no invasiva
     if (!_acceptTerms) {
-      _showError('Debes aceptar los términos y condiciones');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Debes aceptar los términos y condiciones'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
       return;
     }
 
