@@ -96,7 +96,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
     if (!_hasSpecial(newPwd)) {
-      _showSnackBar('La contraseña debe contener al menos un carácter especial (!@#\$%^&*)');
+      _showSnackBar('La contraseña debe contener al menos un carácter especial (!@#\$%^&*.,)');
       return;
     }
     if (!_passwordsMatch(newPwd, confirmPwd)) {
@@ -369,21 +369,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
 
               // Barra de navegación inferior (fija)
-              Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8E8E8),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildNavItem(Icons.calendar_month, 'Reservas', false),
-                    _buildNavItem(Icons.grid_view, 'Servicios', false),
-                    _buildNavItem(Icons.person, 'Cuenta', true),
-                  ],
-                ),
-              ),
+             
 
               // Barra de gestos iOS
               Container(

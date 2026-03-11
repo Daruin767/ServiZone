@@ -3,8 +3,8 @@ import 'package:servizone_app/presentation/views/auth/login_screen.dart';
 import 'package:servizone_app/presentation/views/auth/register_screen.dart';
 import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 import 'package:servizone_app/presentation/views/admin/dashboard_screen.dart';
-import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';    // ← Nueva
-import 'package:servizone_app/presentation/views/guest/guest_home_screen.dart';          // ← Nueva
+import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
+import 'package:servizone_app/presentation/views/guest/guest_home_screen.dart';
 import 'package:servizone_app/presentation/views/splash/splash_screen.dart';
 
 class AppRoutes {
@@ -12,9 +12,11 @@ class AppRoutes {
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String clientHome = '/client/home';
-  static const String providerHome = '/provider/home';      // ← Nueva
-  static const String guestHome = '/guest/home';            // ← Nueva
+  static const String providerHome = '/provider/home';
+  static const String guestHome = '/guest/home';
   static const String adminDashboard = '/admin/dashboard';
+  static const String reservas = '/reservas';
+  static const String account = '/account';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {

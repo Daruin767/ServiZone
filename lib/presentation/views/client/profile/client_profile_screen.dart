@@ -56,14 +56,12 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             color: darkGray,
           ),
         ),
-        
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar y nombre del usuario
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -120,7 +118,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 24),
 
-            // Sección: Información personal
             _buildSectionTitle('Información personal'),
             _buildOptionTile(
               icon: Icons.edit_rounded,
@@ -167,7 +164,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 32),
 
-            // Sección: Soporte y ayuda
             _buildSectionTitle('Soporte y ayuda', icon: Icons.support_agent_rounded),
             _buildOptionTile(
               icon: Icons.email_rounded,
@@ -220,7 +216,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // Botón destacado: Cambiar a proveedor (ahora al final)
+            // BOTÓN CORREGIDO (CENTRADO)
             Container(
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
@@ -254,28 +250,17 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          'Cambiar a proveedor',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(Icons.swap_horiz_rounded, color: primaryBlue, size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Text(
-                            'Cambiar a proveedor',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 16),
                       ],
                     ),
                   ),
@@ -283,7 +268,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               ),
             ),
 
-            // Botón de cerrar sesión
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {

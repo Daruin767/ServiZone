@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/services/subcategory_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
 
 class HomeClientScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class HomeClientScreen extends StatefulWidget {
 
 class _HomeClientScreenState extends State<HomeClientScreen>
     with TickerProviderStateMixin {
-  int _currentIndex = 1; // Por defecto en Servicios (índice 1)
+  int _currentIndex = 1; // Servicios
   String searchQuery = "";
 
   late AnimationController _fadeController;
@@ -128,6 +129,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         currentIndex: _currentIndex,
         onTap: (index) {
           HapticFeedback.lightImpact();
+          if (index == _currentIndex) return; // ya estamos en esa pestaña
           setState(() => _currentIndex = index);
         },
         backgroundColor: Colors.transparent,
@@ -146,7 +148,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Servicios (sin "Agregar dirección") ----------
+  // Pantalla Servicios (categorías)
   Widget _buildSolicitudScreen() {
     final filteredCategories = categories
         .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
@@ -203,7 +205,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                // Campo de búsqueda (antes estaba el bloque de dirección, ahora eliminado)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextField(
@@ -261,7 +262,14 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        // Aquí puedes navegar a la pantalla de servicios de esa categoría
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SubcategoryScreen(
+              categoryName: category["title"],
+            ),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -292,7 +300,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Reservas ----------
+  // Pantalla Reservas (placeholder)
   Widget _buildReservasScreen() {
     return Scaffold(
       backgroundColor: lightGray,
@@ -328,8 +336,8 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // ---------- Pantalla Cuenta ----------
+  // Pantalla Cuenta (usa ClientProfileScreen)
   Widget _buildAccountScreen() {
-    return ClientProfileScreen(onLogout: _logout);
+    return ClientProfileScreen(onLogout: _logout);// Asegúrate de tener el import
   }
 }
