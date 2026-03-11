@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/client/profile/provider_application_screen.dart';
+import 'package:servizone_app/presentation/views/client/profile/edit_profile_screen.dart';
+import 'package:servizone_app/presentation/views/client/profile/change_password_screen.dart';
 
 class ClientProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -60,7 +63,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar y nombre del usuario (como en la imagen)
+            // Avatar y nombre del usuario
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -104,7 +107,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '@$_userName', // El @ se muestra como en la imagen
+                    '@$_userName',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -125,10 +128,10 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidad en desarrollo'),
-                    behavior: SnackBarBehavior.floating,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfileScreen(),
                   ),
                 );
               },
@@ -139,10 +142,10 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidad en desarrollo'),
-                    behavior: SnackBarBehavior.floating,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordScreen(),
                   ),
                 );
               },
@@ -217,6 +220,69 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 40),
 
+            // Botón destacado: Cambiar a proveedor (ahora al final)
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primaryBlue, lightBlue],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryBlue.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProviderApplicationScreen(),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.swap_horiz_rounded, color: primaryBlue, size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Text(
+                            'Cambiar a proveedor',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
             // Botón de cerrar sesión
             Center(
               child: ElevatedButton.icon(
@@ -241,8 +307,8 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                             widget.onLogout();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 255, 138, 130),
-                            foregroundColor: const Color.fromARGB(255, 158, 158, 158),
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                           ),
                           child: const Text('Cerrar sesión'),
                         ),
@@ -256,8 +322,8 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 211, 211, 211),
-                  foregroundColor: const Color.fromARGB(255, 255, 136, 136),
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
