@@ -60,18 +60,33 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _hasSpecial(String pwd) => pwd.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
   bool _passwordsMatch(String pwd, String confirm) => pwd == confirm && confirm.isNotEmpty;
 
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Roboto', fontSize: 14),
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   Future<void> _changePassword() async {
     // Validar campos no vacíos
     if (_currentPasswordController.text.isEmpty) {
-      _showSnackBar('Ingresa tu contraseña actual');
+      _showErrorSnackBar('Ingresa tu contraseña actual');
       return;
     }
     if (_newPasswordController.text.isEmpty) {
-      _showSnackBar('Ingresa una nueva contraseña');
+      _showErrorSnackBar('Ingresa una nueva contraseña');
       return;
     }
     if (_confirmPasswordController.text.isEmpty) {
-      _showSnackBar('Confirma tu nueva contraseña');
+      _showErrorSnackBar('Confirma tu nueva contraseña');
       return;
     }
 
@@ -80,27 +95,27 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     // Validar requisitos de la nueva contraseña
     if (!_hasMinLength(newPwd)) {
-      _showSnackBar('La contraseña debe tener al menos 8 caracteres');
+      _showErrorSnackBar('La contraseña debe tener al menos 8 caracteres');
       return;
     }
     if (!_hasUppercase(newPwd)) {
-      _showSnackBar('La contraseña debe contener al menos una letra mayúscula');
+      _showErrorSnackBar('Debe contener al menos una letra mayúscula');
       return;
     }
     if (!_hasLowercase(newPwd)) {
-      _showSnackBar('La contraseña debe contener al menos una letra minúscula');
+      _showErrorSnackBar('Debe contener al menos una letra minúscula');
       return;
     }
     if (!_hasNumber(newPwd)) {
-      _showSnackBar('La contraseña debe contener al menos un número');
+      _showErrorSnackBar('Debe contener al menos un número');
       return;
     }
     if (!_hasSpecial(newPwd)) {
-      _showSnackBar('La contraseña debe contener al menos un carácter especial (!@#\$%^&*.,)');
+      _showErrorSnackBar('Debe contener al menos un carácter especial (!@#\$%^&*)');
       return;
     }
     if (!_passwordsMatch(newPwd, confirmPwd)) {
-      _showSnackBar('Las contraseñas no coinciden');
+      _showErrorSnackBar('Las contraseñas no coinciden');
       return;
     }
 
@@ -123,24 +138,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     } else {
       setState(() {
         _showError = true;
-        _errorMessage = 'Algo salió mal';
+        _errorMessage = 'Error al cambiar';
       });
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => _showError = false);
       });
     }
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
   }
 
   @override
@@ -151,54 +154,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         children: [
           Column(
             children: [
-              // Status bar simulada
-              Container(
-                height: 44,
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      '9:41',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.signal_cellular_alt, size: 16, color: Colors.black),
-                        const SizedBox(width: 4),
-                        Icon(Icons.wifi, size: 16, color: Colors.black),
-                        const SizedBox(width: 4),
-                        Container(
-                          width: 22,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black, width: 1.5),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: const Align(
-                            alignment: Alignment.centerRight,
-                            child: Padding(
-                              padding: EdgeInsets.all(1.5),
-                              child: ColoredBox(color: Colors.black),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Header azul con avatar, nombre y botón volver
+              // Header blanco de 80px
               Container(
                 height: 80,
-                color: const Color(0xFF166AA3),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     // Avatar circular gris
@@ -206,39 +166,51 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       width: 45,
                       height: 45,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFD6D6D6),
+                        color: Color(0xFFE0E0E0),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Text(
                           _getInitials(_userName),
                           style: const TextStyle(
-                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Nombre de usuario
+                    const SizedBox(width: 12),
+                    // Nombre con @
                     Text(
                       '@$_userName',
                       style: const TextStyle(
+                        fontFamily: 'Poppins',
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                     const Spacer(),
-                    // Botón Volver (texto)
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                    // Botón Volver con fondo azul
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(70, 36),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
                       child: const Text(
                         'Volver',
                         style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -246,130 +218,144 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
 
-              // Contenido principal (scroll)
+              // Contenedor principal con fondo blanco (tarjeta)
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Título con icono de candado
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.lock_outline,
-                              size: 22,
-                              color: Colors.grey[700],
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Cambiar contraseña',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF222222),
-                              ),
-                            ),
-                          ],
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // Campo: Contraseña actual
-                        const Text(
-                          'Contraseña actual',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF333333),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPasswordField(
-                          controller: _currentPasswordController,
-                          obscureText: _obscureCurrent,
-                          onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Campo: Contraseña nueva
-                        const Text(
-                          'Contraseña nueva',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF333333),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPasswordField(
-                          controller: _newPasswordController,
-                          obscureText: _obscureNew,
-                          onToggle: () => setState(() => _obscureNew = !_obscureNew),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Campo: Confirmar contraseña
-                        const Text(
-                          'Confirmar contraseña',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF333333),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPasswordField(
-                          controller: _confirmPasswordController,
-                          obscureText: _obscureConfirm,
-                          onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Botón Cambiar contraseña
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _changePassword,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF145A8D),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Cambiar contraseña',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 40), // Espacio extra para el scroll
                       ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Título con icono de candado
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 22,
+                                color: Colors.grey[700],
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Cambiar contraseña',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500,
+                                  color: darkGray,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Campo: Contraseña actual
+                          Text(
+                            'Contraseña actual',
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: darkGray,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildPasswordField(
+                            controller: _currentPasswordController,
+                            obscureText: _obscureCurrent,
+                            onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Campo: Contraseña nueva
+                          Text(
+                            'Contraseña nueva',
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: darkGray,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildPasswordField(
+                            controller: _newPasswordController,
+                            obscureText: _obscureNew,
+                            onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Campo: Confirmar contraseña
+                          Text(
+                            'Confirmar contraseña',
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: darkGray,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildPasswordField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirm,
+                            onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Botón Cambiar contraseña
+                          SizedBox(
+                            width: double.infinity,
+                            height: 54,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _changePassword,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryBlue,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 2,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Cambiar contraseña',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-
-              // Barra de navegación inferior (fija)
-             
 
               // Barra de gestos iOS
               Container(
@@ -392,7 +378,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           if (_showSuccess)
             _buildModal(
               icon: Icons.check_circle,
-              color: const Color(0xFF59D63A),
+              color: Colors.green,
               message: 'Contraseña actualizada',
             ),
 
@@ -400,7 +386,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           if (_showError)
             _buildModal(
               icon: Icons.cancel,
-              color: const Color(0xFFFF1A1A),
+              color: Colors.red,
               message: _errorMessage,
             ),
         ],
@@ -416,60 +402,48 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFDCDCDC),
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
-        style: const TextStyle(fontSize: 14, color: Color(0xFF222222)),
+        style: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 14,
+          color: darkGray,
+        ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          // CORRECCIÓN: padding vertical para centrar los asteriscos
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF8A8A8A),
+              color: mediumGray,
               size: 20,
             ),
             onPressed: onToggle,
           ),
           hintText: '********',
-          hintStyle: const TextStyle(color: Color(0xFF8A8A8A)),
+          hintStyle: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 14,
+            color: mediumGray,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isActive ? const Color(0xFF166AA3) : const Color(0xFF9A9A9A),
-          size: 28,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? const Color(0xFF166AA3) : const Color(0xFF9A9A9A),
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildModal({required IconData icon, required Color color, required String message}) {
     return Container(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withOpacity(0.5),
       child: Center(
         child: Container(
-          width: 260,
-          height: 260,
+          width: 220,
+          height: 220,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -477,26 +451,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 50,
-                  color: Colors.black,
-                ),
+              Icon(
+                icon,
+                size: 70,
+                color: color,
               ),
               const SizedBox(height: 20),
               Text(
                 message,
                 style: const TextStyle(
+                  fontFamily: 'Poppins',
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF222222),
+                  color: darkGray,
                 ),
                 textAlign: TextAlign.center,
               ),

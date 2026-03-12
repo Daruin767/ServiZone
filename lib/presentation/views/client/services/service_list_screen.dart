@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 
 class ServiceListScreen extends StatefulWidget {
   final String categoryName;
@@ -20,11 +20,10 @@ class ServiceListScreen extends StatefulWidget {
 class _ServiceListScreenState extends State<ServiceListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedSort = 'Calificación'; // 'Calificación' o 'Precio'
-  bool _sortAscending = false; // false = mayor a menor (mejor calificado o mayor precio)
+  String _selectedSort = 'Calificación';
+  bool _sortAscending = false;
   final Set<String> _selectedTypes = {};
 
-  // Mapa de servicios por subcategoría
   final Map<String, List<Map<String, dynamic>>> _servicesBySubcategory = {
     'Plomería': [
       {
@@ -112,7 +111,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         'icon': Icons.handyman,
       },
     ],
-    // Agrega más según necesites
   };
 
   List<Map<String, dynamic>> get _allServices {
@@ -124,18 +122,15 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredServices {
-    // Filtrar por búsqueda
     var filtered = _allServices.where((s) {
       return s['name'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
           s['professional'].toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
-    // Filtrar por tipo seleccionado
     if (_selectedTypes.isNotEmpty) {
       filtered = filtered.where((s) => _selectedTypes.contains(s['type'])).toList();
     }
 
-    // Ordenar
     if (_selectedSort == 'Calificación') {
       filtered.sort((a, b) => _sortAscending
           ? a['rating'].compareTo(b['rating'])
@@ -154,6 +149,14 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     super.dispose();
   }
 
+  void _navigateToHomeWithIndex(int index) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => HomeClientScreen(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,14 +172,10 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             color: primaryBlue,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: darkGray),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // Sin leading
       ),
       body: Column(
         children: [
-          // Buscador funcional
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Container(
@@ -208,8 +207,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ),
             ),
           ),
-
-          // Filtros de ordenamiento
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -243,7 +240,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                           _sortAscending = !_sortAscending;
                         } else {
                           _selectedSort = 'Precio';
-                          _sortAscending = false; // mayor a menor por defecto
+                          _sortAscending = false;
                         }
                       });
                     },
@@ -252,8 +249,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ],
             ),
           ),
-
-          // Filtros por tipo (chips) - solo si hay tipos disponibles
           if (_availableTypes.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -291,8 +286,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 }).toList(),
               ),
             ),
-
-          // Lista de servicios
           Expanded(
             child: _filteredServices.isEmpty
                 ? Center(
@@ -319,7 +312,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(context, 1),
+      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -374,7 +367,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icono izquierdo
             Container(
               width: 70,
               height: 70,
@@ -389,12 +381,10 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            // Información derecha
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Título y calificación
                   Row(
                     children: [
                       Expanded(
@@ -491,29 +481,25 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     );
   }
 
-  Widget _buildBottomNavBar(BuildContext context, int currentIndex) {
+  Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
       ),
       child: BottomNavigationBar(
-        currentIndex: currentIndex,
+        currentIndex: 1,
         onTap: (index) {
           HapticFeedback.lightImpact();
-          if (index == currentIndex) return;
           switch (index) {
             case 0:
-              // Reservas
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome); // temporal
+              _navigateToHomeWithIndex(0);
               break;
             case 1:
-              // Servicios (volver a home de categorías)
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
+              _navigateToHomeWithIndex(1);
               break;
             case 2:
-              // Cuenta
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome); // temporal
+              _navigateToHomeWithIndex(2);
               break;
           }
         },

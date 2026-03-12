@@ -7,7 +7,8 @@ import 'package:servizone_app/presentation/views/client/services/subcategory_scr
 import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
 
 class HomeClientScreen extends StatefulWidget {
-  const HomeClientScreen({super.key});
+  final int initialIndex;
+  const HomeClientScreen({super.key, this.initialIndex = 1});
 
   @override
   State<HomeClientScreen> createState() => _HomeClientScreenState();
@@ -15,7 +16,7 @@ class HomeClientScreen extends StatefulWidget {
 
 class _HomeClientScreenState extends State<HomeClientScreen>
     with TickerProviderStateMixin {
-  int _currentIndex = 1; // Servicios
+  late int _currentIndex;
   String searchQuery = "";
 
   late AnimationController _fadeController;
@@ -71,6 +72,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -129,7 +131,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         currentIndex: _currentIndex,
         onTap: (index) {
           HapticFeedback.lightImpact();
-          if (index == _currentIndex) return; // ya estamos en esa pestaña
+          if (index == _currentIndex) return;
           setState(() => _currentIndex = index);
         },
         backgroundColor: Colors.transparent,
@@ -306,8 +308,8 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       backgroundColor: lightGray,
       appBar: AppBar(
         title: const Text("Mis Reservas"),
-        backgroundColor: primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
         elevation: 0,
       ),
       body: Center(
@@ -338,6 +340,6 @@ class _HomeClientScreenState extends State<HomeClientScreen>
 
   // Pantalla Cuenta (usa ClientProfileScreen)
   Widget _buildAccountScreen() {
-    return ClientProfileScreen(onLogout: _logout);// Asegúrate de tener el import
+    return ClientProfileScreen(onLogout: _logout);
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 import 'package:servizone_app/presentation/views/client/services/service_list_screen.dart';
 
 class SubcategoryScreen extends StatefulWidget {
@@ -17,7 +17,6 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Mapa de categorías a subcategorías
   final Map<String, List<Map<String, dynamic>>> _categorySubcategories = {
     'Hogar': [
       {'name': 'Plomería', 'icon': Icons.plumbing, 'color': const Color(0xFF4FA3D1)},
@@ -65,6 +64,14 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
     super.dispose();
   }
 
+  void _navigateToHomeWithIndex(int index) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => HomeClientScreen(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,14 +87,10 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
             color: primaryBlue,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: darkGray),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // Sin leading
       ),
       body: Column(
         children: [
-          // Buscador funcional
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
@@ -119,7 +122,6 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
               ),
             ),
           ),
-          // Lista de subcategorías
           Expanded(
             child: _subcategories.isEmpty
                 ? Center(
@@ -199,36 +201,29 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(context, 1),
+      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-  Widget _buildBottomNavBar(BuildContext context, int currentIndex) {
+  Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
       ),
       child: BottomNavigationBar(
-        currentIndex: currentIndex,
+        currentIndex: 1,
         onTap: (index) {
           HapticFeedback.lightImpact();
-          if (index == currentIndex) return;
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome); // pero debería ser reservas
-              // Como no tenemos pantalla de reservas, por ahora redirigimos a home (servicios)
-              // En un futuro, crear ReservasScreen y usar AppRoutes.reservas
+              _navigateToHomeWithIndex(0);
               break;
             case 1:
-              // Ya estamos en servicios, pero si estamos en subcategoría, volver a home? mejor no hacer nada
-              // Podríamos ir al home de servicios (categorías)
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
+              _navigateToHomeWithIndex(1);
               break;
             case 2:
-              Navigator.pushReplacementNamed(context, AppRoutes.clientHome); // temporal, debería ir a cuenta
-              // En realidad debería ir a la pantalla de cuenta, pero como está dentro de home, podemos volver a home
-              // Ideal: crear pantalla de cuenta separada y usar AppRoutes.account
+              _navigateToHomeWithIndex(2);
               break;
           }
         },
