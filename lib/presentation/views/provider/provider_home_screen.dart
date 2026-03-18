@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/core/routes/app_routes.dart';
 
 class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
@@ -11,288 +11,489 @@ class ProviderHomeScreen extends StatefulWidget {
 }
 
 class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
-  int _selectedIndex = 0;
+  String _userName = 'Usuario';
 
-  final List<Widget> _screens = [
-    const _DashboardTab(),
-    const _ServicesTab(),
-    const _BookingsTab(),
-    const _ProfileTab(),
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name');
+    if (name != null && mounted) {
+      setState(() {
+        _userName = name;
+      });
+    }
+  }
+
+  // Datos de ejemplo
+  final List<Map<String, dynamic>> services = List.generate(3, (index) => {
+    'name': 'Servicio de ejemplo 1',
+    'price': 45000,
+    'status': 'Activo',
+  });
+
+  final List<Map<String, dynamic>> bookings = [
+    {
+      'client': 'Ana garcia',
+      'date': '15 marzo 2026',
+      'time': '10:30',
+      'status': 'Confirmada',
+    },
+    {
+      'client': 'Ana garcia',
+      'date': '15 marzo 2026',
+      'time': '11:00',
+      'status': 'Pendiente',
+    },
+    {
+      'client': 'Ana garcia',
+      'date': '15 marzo 2026',
+      'time': '10:30',
+      'status': 'Cancelada',
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightGray,
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt_rounded), label: 'Servicios'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Perfil'),
+      backgroundColor: const Color(0xFFF1F1F1), // Fondo general actualizado
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 30),
+              // Header
+              Text(
+                'Bienvenido, @$_userName!',
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(color: lightGray, thickness: 1),
+              const SizedBox(height: 20),
+
+              // Tarjeta de métricas (fondo blanco)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white, // Fondo blanco
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildMetric(
+                      icon: Icons.star_rounded,
+                      iconColor: Colors.amber,
+                      value: '4.8',
+                      label: 'Calificación promedio',
+                    ),
+                    _buildVerticalDivider(),
+                    _buildMetric(
+                      icon: Icons.calendar_today_rounded,
+                      iconColor: const Color(0xFF1976D2),
+                      value: '12',
+                      label: 'Reservas del mes',
+                    ),
+                    _buildVerticalDivider(),
+                    _buildMetric(
+                      icon: Icons.attach_money_rounded,
+                      iconColor: const Color(0xFF2E7D32),
+                      value: '\$200,000',
+                      label: 'Ingresos',
+                    ),
+                    _buildVerticalDivider(),
+                    _buildMetric(
+                      icon: Icons.build_rounded,
+                      iconColor: const Color(0xFF1976D2),
+                      value: '3',
+                      label: 'Servicios activos',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Botón Crear nuevo servicio
+              Center(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      // Aquí navegar a crear servicio
+                    },
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    label: const Text(
+                      'Crear nuevo servicio',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0D47A1),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Sección: Tus servicios
+              _buildSectionTitle('Tus servicios'),
+              const SizedBox(height: 12),
+
+              // Lista de servicios (tarjetas blancas)
+              ...services.map((service) => _buildServiceCard(service)).toList(),
+
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    // Navegar a todos los servicios
+                  },
+                  child: const Text(
+                    'Ver todos mis servicios >',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 14,
+                      color: mediumGray,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Sección: Próximas reservas
+              _buildSectionTitle('Proximas reservas'),
+              const SizedBox(height: 12),
+
+              // Lista de reservas (tarjetas blancas)
+              ...bookings.map((booking) => _buildBookingCard(booking)).toList(),
+
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavBar(),
+    );
+  }
+
+  Widget _buildMetric({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: iconColor, size: 24),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 10,
+              color: mediumGray,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
-}
 
-// -------------------- TABS DEL PROVEEDOR --------------------
+  Widget _buildVerticalDivider() {
+    return Container(
+      height: 40,
+      width: 1,
+      color: lightGray,
+    );
+  }
 
-class _DashboardTab extends StatelessWidget {
-  const _DashboardTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text('Panel de Proveedor'),
-        backgroundColor: primaryBlue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tarjeta de resumen
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: cardShadow, blurRadius: 10)],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: primaryBlue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.business_center, color: primaryBlue, size: 30),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          '¡Bienvenido, Proveedor!',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Tienes 12 servicios activos',
-                          style: TextStyle(color: mediumGray),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Tus servicios',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray),
-            ),
-            const SizedBox(height: 16),
-            ...List.generate(3, (index) => _buildServiceCard(index)),
-            const SizedBox(height: 24),
-            const Text(
-              'Próximas reservas',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray),
-            ),
-            const SizedBox(height: 16),
-            ...List.generate(2, (index) => _buildBookingCard(index)),
-          ],
-        ),
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
       ),
     );
   }
 
-  Widget _buildServiceCard(int index) {
+  Widget _buildServiceCard(Map<String, dynamic> service) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, // Fondo blanco
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 5)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
+          // Icono con fondo gris claro para contraste
           Container(
-            width: 50,
-            height: 50,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: primaryBlue.withOpacity(0.1),
+              color: Colors.grey[100], // Gris muy claro
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.build_rounded, color: primaryBlue),
+            child: Icon(
+              Icons.build_rounded,
+              color: const Color(0xFF1976D2),
+              size: 28,
+            ),
           ),
           const SizedBox(width: 16),
+          // Texto
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Servicio de ejemplo ${index + 1}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: darkGray),
+                  service['name'],
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                const Text('\$45.000', style: TextStyle(color: primaryBlue, fontWeight: FontWeight.w600)),
+                Text(
+                  '\$${service['price'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1976D2),
+                  ),
+                ),
               ],
             ),
           ),
+          // Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFF4CAF50),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('Activo', style: TextStyle(color: Colors.green, fontSize: 12)),
+            child: const Text(
+              'Activo',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBookingCard(int index) {
+  Widget _buildBookingCard(Map<String, dynamic> booking) {
+    Color statusColor;
+    Color statusTextColor;
+    Color circleColor;
+    String statusText = booking['status'];
+
+    switch (statusText) {
+      case 'Confirmada':
+        statusColor = const Color(0xFF64B5F6);
+        statusTextColor = const Color(0xFF0D47A1);
+        circleColor = const Color(0xFFDCE775);
+        break;
+      case 'Pendiente':
+        statusColor = const Color(0xFFFFF176);
+        statusTextColor = const Color(0xFFF57F17);
+        circleColor = const Color(0xFFDCE775);
+        break;
+      case 'Cancelada':
+        statusColor = const Color(0xFFE57373);
+        statusTextColor = Colors.white;
+        circleColor = const Color(0xFFDCE775);
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusTextColor = Colors.white;
+        circleColor = Colors.grey;
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, // Fondo blanco
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 5)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.orange.withOpacity(0.1),
-            child: const Icon(Icons.person, color: Colors.orange),
+          // Círculo
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: circleColor,
+              shape: BoxShape.circle,
+            ),
           ),
           const SizedBox(width: 16),
+          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Cliente: Ana García', style: TextStyle(fontWeight: FontWeight.bold, color: darkGray)),
+                Text(
+                  'Cliente: ${booking['client']}',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('15 Mar 2026 • 10:30', style: TextStyle(color: mediumGray, fontSize: 12)),
+                Text(
+                  '${booking['date']} - ${booking['time']}',
+                  style: const TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 12,
+                    color: mediumGray,
+                  ),
+                ),
               ],
             ),
           ),
+          // Badge de estado
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: statusColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text('Confirmada', style: TextStyle(color: Colors.blue, fontSize: 12)),
+            child: Text(
+              statusText,
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: statusTextColor,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class _ServicesTab extends StatelessWidget {
-  const _ServicesTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text('Mis Servicios'),
-        backgroundColor: primaryBlue,
-        foregroundColor: Colors.white,
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
-      body: const Center(
-        child: Text(
-          'Aquí podrás gestionar tus servicios',
-          style: TextStyle(color: mediumGray),
+      child: BottomNavigationBar(
+        currentIndex: 0,
+        onTap: (index) {
+          HapticFeedback.lightImpact();
+          // Aquí iría la navegación
+        },
+        backgroundColor: Colors.white,
+        elevation: 0,
+        selectedItemColor: const Color(0xFF1976D2),
+        unselectedItemColor: mediumGray,
+        selectedLabelStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
         ),
-      ),
-    );
-  }
-}
-
-class _BookingsTab extends StatelessWidget {
-  const _BookingsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text('Reservas'),
-        backgroundColor: primaryBlue,
-        foregroundColor: Colors.white,
-      ),
-      body: const Center(
-        child: Text(
-          'Aquí verás las reservas de tus clientes',
-          style: TextStyle(color: mediumGray),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12,
         ),
-      ),
-    );
-  }
-}
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
-
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    if (context.mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        backgroundColor: primaryBlue,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.business_center, size: 80, color: primaryBlue),
-            const SizedBox(height: 20),
-            const Text('Proveedor Demo', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            const Text('proveedor@servizone.com', style: TextStyle(color: mediumGray)),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () => _logout(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              ),
-              child: const Text('Cerrar Sesión'),
-            ),
-          ],
-        ),
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_rounded),
+            label: 'Servicios',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_rounded),
+            label: 'Reservas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: 'Cuenta',
+          ),
+        ],
       ),
     );
   }

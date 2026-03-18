@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 
 class ServiceListScreen extends StatefulWidget {
   final String categoryName;
@@ -23,6 +22,11 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   String _selectedSort = 'Calificación';
   bool _sortAscending = false;
   final Set<String> _selectedTypes = {};
+
+  // Estados para los modales de éxito/error
+  bool _showSuccess = false;
+  bool _showError = false;
+  String _errorMessage = 'Error al reservar';
 
   final Map<String, List<Map<String, dynamic>>> _servicesBySubcategory = {
     'Plomería': [
@@ -149,12 +153,244 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     super.dispose();
   }
 
-  void _navigateToHomeWithIndex(int index) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => HomeClientScreen(initialIndex: index)),
-      (route) => false,
+  void _showBookingDialog(Map<String, dynamic> service) {
+    // Lista de reseñas de ejemplo
+    final List<Map<String, String>> reviews = [
+      {
+        'name': 'Marlon Paez',
+        'comment': 'Excelente corte, muy profesional',
+      },
+      {
+        'name': 'Felipe Mazo',
+        'comment': 'Me encanta lo que hace con mi cabello, es mi peluquero favorito, sabe lo que necesito',
+      },
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+          child: Column(
+            children: [
+              // Ícono grande en la parte superior
+              Container(
+                margin: const EdgeInsets.only(top: 24, bottom: 8),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: service['iconColor'].withOpacity(0.2),
+                  child: Icon(
+                    service['icon'],
+                    size: 50,
+                    color: service['iconColor'],
+                  ),
+                ),
+              ),
+              // Título y botón
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            service['name'],
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: darkGray,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            service['professional'],
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: mediumGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _processBooking(service);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(90, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Reservar'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1, thickness: 1, color: lightGray),
+              // Contenido scrolleable
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Calificación con estrellas
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                          const SizedBox(width: 4),
+                          Text(
+                            service['rating'].toString(),
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: darkGray,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '(15 reseñas)',
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: mediumGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Detalles del servicio
+                      const Text(
+                        'Detalles del servicio',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: darkGray,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        service['description'],
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 14,
+                          color: darkGray,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Costo: \$${service['price'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: darkGray,
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+                      const Divider(height: 1, thickness: 1, color: lightGray),
+
+                      // Reseñas
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Reseñas',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: darkGray,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '(15 reseñas)',
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 14,
+                          color: mediumGray,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Lista de reseñas
+                      ...reviews.map((review) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  review['name']!,
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: darkGray,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  review['comment']!,
+                                  style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 14,
+                                    color: mediumGray,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
+
+  void _processBooking(Map<String, dynamic> service) async {
+    // Simular proceso de reserva
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Simular éxito/error aleatorio
+    final random = DateTime.now().millisecondsSinceEpoch % 2;
+    if (random == 0) {
+      // Éxito
+      setState(() => _showSuccess = true);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _showSuccess = false);
+      });
+    } else {
+      // Error
+      setState(() {
+        _showError = true;
+        _errorMessage = 'No se pudo realizar la reserva';
+      });
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _showError = false);
+      });
+    }
   }
 
   @override
@@ -167,152 +403,188 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         title: Text(
           widget.subcategoryName,
           style: const TextStyle(
+            fontFamily: 'Poppins',
             fontSize: 22,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: primaryBlue,
           ),
         ),
-        // Sin leading
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: darkGray),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [BoxShadow(color: cardShadow, blurRadius: 8)],
+          Column(
+            children: [
+              // Buscador
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [BoxShadow(color: cardShadow, blurRadius: 8)],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar el servicio que necesitas',
+                      hintStyle: TextStyle(fontFamily: 'Roboto', color: mediumGray),
+                      prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear_rounded, color: mediumGray),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
               ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (v) => setState(() => _searchQuery = v),
-                decoration: InputDecoration(
-                  hintText: 'Buscar el servicio que necesitas',
-                  hintStyle: TextStyle(color: mediumGray),
-                  prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear_rounded, color: mediumGray),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
+
+              // Filtros de ordenamiento
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildSortButton(
+                        icon: Icons.star_rounded,
+                        label: 'Mejor calificados',
+                        isSelected: _selectedSort == 'Calificación' && !_sortAscending,
+                        onTap: () {
+                          setState(() {
+                            if (_selectedSort == 'Calificación') {
+                              _sortAscending = !_sortAscending;
+                            } else {
+                              _selectedSort = 'Calificación';
+                              _sortAscending = false;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildSortButton(
+                        icon: Icons.attach_money_rounded,
+                        label: 'Precio',
+                        isSelected: _selectedSort == 'Precio',
+                        onTap: () {
+                          setState(() {
+                            if (_selectedSort == 'Precio') {
+                              _sortAscending = !_sortAscending;
+                            } else {
+                              _selectedSort = 'Precio';
+                              _sortAscending = false;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Filtros por tipo
+              if (_availableTypes.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: _availableTypes.map((type) {
+                      final isSelected = _selectedTypes.contains(type);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTypes.add(type);
+                              } else {
+                                _selectedTypes.remove(type);
+                              }
+                            });
                           },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildSortButton(
-                    icon: Icons.star_rounded,
-                    label: 'Mejor calificados',
-                    isSelected: _selectedSort == 'Calificación' && !_sortAscending,
-                    onTap: () {
-                      setState(() {
-                        if (_selectedSort == 'Calificación') {
-                          _sortAscending = !_sortAscending;
-                        } else {
-                          _selectedSort = 'Calificación';
-                          _sortAscending = false;
-                        }
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildSortButton(
-                    icon: Icons.attach_money_rounded,
-                    label: 'Precio',
-                    isSelected: _selectedSort == 'Precio',
-                    onTap: () {
-                      setState(() {
-                        if (_selectedSort == 'Precio') {
-                          _sortAscending = !_sortAscending;
-                        } else {
-                          _selectedSort = 'Precio';
-                          _sortAscending = false;
-                        }
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_availableTypes.isNotEmpty)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: _availableTypes.map((type) {
-                  final isSelected = _selectedTypes.contains(type);
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(type),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTypes.add(type);
-                          } else {
-                            _selectedTypes.remove(type);
-                          }
-                        });
-                      },
-                      backgroundColor: Colors.white,
-                      selectedColor: primaryBlue,
-                      checkmarkColor: Colors.white,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : darkGray,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: isSelected ? primaryBlue : mediumGray.withOpacity(0.3)),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          Expanded(
-            child: _filteredServices.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off_rounded, size: 60, color: mediumGray),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No se encontraron servicios',
-                          style: TextStyle(color: mediumGray, fontSize: 16),
+                          backgroundColor: Colors.white,
+                          selectedColor: primaryBlue,
+                          checkmarkColor: Colors.white,
+                          labelStyle: TextStyle(
+                            fontFamily: 'Roboto',
+                            fontSize: 13,
+                            color: isSelected ? Colors.white : darkGray,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(color: isSelected ? primaryBlue : mediumGray.withOpacity(0.3)),
+                          ),
                         ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _filteredServices.length,
-                    itemBuilder: (context, index) {
-                      final service = _filteredServices[index];
-                      return _buildServiceCard(service);
-                    },
+                      );
+                    }).toList(),
                   ),
+                ),
+
+              // Lista de servicios
+              Expanded(
+                child: _filteredServices.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded, size: 60, color: mediumGray),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No se encontraron servicios',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontSize: 16,
+                                color: mediumGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _filteredServices.length,
+                        itemBuilder: (context, index) {
+                          final service = _filteredServices[index];
+                          return _buildServiceCard(service);
+                        },
+                      ),
+              ),
+            ],
           ),
+
+          // Modal de éxito
+          if (_showSuccess)
+            _buildModal(
+              icon: Icons.check_circle,
+              color: Colors.green,
+              message: 'Reserva confirmada',
+            ),
+
+          // Modal de error
+          if (_showError)
+            _buildModal(
+              icon: Icons.cancel,
+              color: Colors.red,
+              message: _errorMessage,
+            ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -343,6 +615,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             Text(
               label,
               style: TextStyle(
+                fontFamily: 'Roboto',
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : darkGray,
@@ -367,6 +640,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Icono izquierdo
             Container(
               width: 70,
               height: 70,
@@ -381,18 +655,21 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ),
             ),
             const SizedBox(width: 16),
+            // Información derecha
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Título y calificación
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           service['name'],
                           style: const TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             color: darkGray,
                           ),
                         ),
@@ -404,15 +681,17 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                   Text(
                     service['professional'],
                     style: TextStyle(
+                      fontFamily: 'Roboto',
                       fontSize: 14,
                       color: primaryBlue,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     service['description'],
                     style: TextStyle(
+                      fontFamily: 'Roboto',
                       fontSize: 12,
                       color: mediumGray,
                     ),
@@ -426,21 +705,16 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       Text(
                         '\$${service['price'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
                         style: const TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: darkGray,
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Reservando ${service['name']}'),
-                              backgroundColor: Colors.green,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          _showBookingDialog(service);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2E7D32),
@@ -481,40 +755,39 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     );
   }
 
-  Widget _buildBottomNavBar() {
+  Widget _buildModal({required IconData icon, required Color color, required String message}) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          HapticFeedback.lightImpact();
-          switch (index) {
-            case 0:
-              _navigateToHomeWithIndex(0);
-              break;
-            case 1:
-              _navigateToHomeWithIndex(1);
-              break;
-            case 2:
-              _navigateToHomeWithIndex(2);
-              break;
-          }
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
-        ],
+      color: Colors.black.withOpacity(0.5),
+      child: Center(
+        child: Container(
+          width: 220,
+          height: 220,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 70,
+                color: color,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                message,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: darkGray,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
