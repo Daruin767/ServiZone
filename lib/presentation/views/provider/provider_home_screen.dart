@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
 
 class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
@@ -12,6 +14,7 @@ class ProviderHomeScreen extends StatefulWidget {
 
 class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
   String _userName = 'Usuario';
+  int _currentIndex = 0; // 0: Inicio
 
   @override
   void initState() {
@@ -29,12 +32,19 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
     }
   }
 
-  // Datos de ejemplo
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   final List<Map<String, dynamic>> services = List.generate(3, (index) => {
-    'name': 'Servicio de ejemplo 1',
-    'price': 45000,
-    'status': 'Activo',
-  });
+        'name': 'Servicio de ejemplo 1',
+        'price': 45000,
+        'status': 'Activo',
+      });
 
   final List<Map<String, dynamic>> bookings = [
     {
@@ -60,16 +70,17 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F1F1), // Fondo general actualizado
+      backgroundColor: const Color(0xFFF1F1F1),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 30),
-              // Header
-              Text(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ✅ Contenedor de bienvenida: fondo blanco, ocupa todo el ancho
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              child: Text(
                 'Bienvenido, @$_userName!',
                 style: const TextStyle(
                   fontFamily: 'Poppins',
@@ -78,127 +89,129 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 12),
-              const Divider(color: lightGray, thickness: 1),
-              const SizedBox(height: 20),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  const Divider(color: lightGray, thickness: 1),
+                  const SizedBox(height: 20),
 
-              // Tarjeta de métricas (fondo blanco)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white, // Fondo blanco
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+                  // Tarjeta de métricas
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildMetric(
-                      icon: Icons.star_rounded,
-                      iconColor: Colors.amber,
-                      value: '4.8',
-                      label: 'Calificación promedio',
-                    ),
-                    _buildVerticalDivider(),
-                    _buildMetric(
-                      icon: Icons.calendar_today_rounded,
-                      iconColor: const Color(0xFF1976D2),
-                      value: '12',
-                      label: 'Reservas del mes',
-                    ),
-                    _buildVerticalDivider(),
-                    _buildMetric(
-                      icon: Icons.attach_money_rounded,
-                      iconColor: const Color(0xFF2E7D32),
-                      value: '\$200,000',
-                      label: 'Ingresos',
-                    ),
-                    _buildVerticalDivider(),
-                    _buildMetric(
-                      icon: Icons.build_rounded,
-                      iconColor: const Color(0xFF1976D2),
-                      value: '3',
-                      label: 'Servicios activos',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Botón Crear nuevo servicio
-              Center(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      // Aquí navegar a crear servicio
-                    },
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text(
-                      'Crear nuevo servicio',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D47A1),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMetric(
+                          icon: Icons.star_rounded,
+                          iconColor: Colors.amber,
+                          value: '4.8',
+                          label: 'Calificación promedio',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildMetric(
+                          icon: Icons.calendar_today_rounded,
+                          iconColor: const Color(0xFF1976D2),
+                          value: '12',
+                          label: 'Reservas del mes',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildMetric(
+                          icon: Icons.attach_money_rounded,
+                          iconColor: const Color(0xFF2E7D32),
+                          value: '\$200,000',
+                          label: 'Ingresos',
+                        ),
+                        _buildVerticalDivider(),
+                        _buildMetric(
+                          icon: Icons.build_rounded,
+                          iconColor: const Color(0xFF1976D2),
+                          value: '3',
+                          label: 'Servicios activos',
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
 
-              // Sección: Tus servicios
-              _buildSectionTitle('Tus servicios'),
-              const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
-              // Lista de servicios (tarjetas blancas)
-              ...services.map((service) => _buildServiceCard(service)).toList(),
-
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    // Navegar a todos los servicios
-                  },
-                  child: const Text(
-                    'Ver todos mis servicios >',
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 14,
-                      color: mediumGray,
+                  // Botón Crear nuevo servicio
+                  Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                        },
+                        icon: const Icon(Icons.add, color: Colors.white),
+                        label: const Text(
+                          'Crear nuevo servicio',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0D47A1),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 32),
+
+                  _buildSectionTitle('Tus servicios'),
+                  const SizedBox(height: 12),
+
+                  ...services.map((service) => _buildServiceCard(service)).toList(),
+
+                  const SizedBox(height: 8),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        'Ver todos mis servicios >',
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 14,
+                          color: mediumGray,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildSectionTitle('Proximas reservas'),
+                  const SizedBox(height: 12),
+
+                  ...bookings.map((booking) => _buildBookingCard(booking)).toList(),
+
+                  const SizedBox(height: 30),
+                ],
               ),
-              const SizedBox(height: 32),
-
-              // Sección: Próximas reservas
-              _buildSectionTitle('Proximas reservas'),
-              const SizedBox(height: 12),
-
-              // Lista de reservas (tarjetas blancas)
-              ...bookings.map((booking) => _buildBookingCard(booking)).toList(),
-
-              const SizedBox(height: 30),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: _buildBottomNavBar(),
@@ -266,7 +279,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white, // Fondo blanco
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -278,12 +291,11 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
       ),
       child: Row(
         children: [
-          // Icono con fondo gris claro para contraste
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.grey[100], // Gris muy claro
+              color: Colors.grey[100],
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -293,7 +305,6 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          // Texto
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +331,6 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               ],
             ),
           ),
-          // Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -374,7 +384,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white, // Fondo blanco
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -386,7 +396,6 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
       ),
       child: Row(
         children: [
-          // Círculo
           Container(
             width: 40,
             height: 40,
@@ -396,7 +405,6 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,7 +430,6 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               ],
             ),
           ),
-          // Badge de estado
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -457,10 +464,46 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
+        currentIndex: _currentIndex,
+        onTap: (index) async {
           HapticFeedback.lightImpact();
-          // Aquí iría la navegación
+          setState(() {
+            _currentIndex = index;
+          });
+          switch (index) {
+            case 0:
+              // Ya estamos en inicio
+              break;
+            case 1:
+              // Servicios (placeholder)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sección de servicios en desarrollo'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              break;
+            case 2:
+              // Reservas (placeholder)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sección de reservas en desarrollo'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              break;
+            case 3:
+              // Cuenta: navegar a ProviderProfileScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProviderProfileScreen(
+                    onLogout: _logout,
+                  ),
+                ),
+              );
+              break;
+          }
         },
         backgroundColor: Colors.white,
         elevation: 0,

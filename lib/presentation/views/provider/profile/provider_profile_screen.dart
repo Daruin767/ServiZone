@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/presentation/views/client/profile/provider_application_screen.dart';
-import 'package:servizone_app/presentation/views/client/profile/edit_profile_screen.dart';
-import 'package:servizone_app/presentation/views/client/profile/change_password_screen.dart';
+import 'package:servizone_app/presentation/views/provider/profile/provider_edit_profile_screen.dart';
+import 'package:servizone_app/presentation/views/provider/profile/provider_change_password_screen.dart';
+import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 
-class ClientProfileScreen extends StatefulWidget {
+class ProviderProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
 
-  const ClientProfileScreen({super.key, required this.onLogout});
+  const ProviderProfileScreen({super.key, required this.onLogout});
 
   @override
-  State<ClientProfileScreen> createState() => _ClientProfileScreenState();
+  State<ProviderProfileScreen> createState() => _ProviderProfileScreenState();
 }
 
-class _ClientProfileScreenState extends State<ClientProfileScreen> {
+class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   String _userName = 'Usuario';
 
   @override
@@ -41,19 +43,59 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 
+  void _showChangeRoleConfirmation() {
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Cambiar a cliente'),
+      content: const Text(
+        '¿Estás seguro de que deseas cambiar a cliente? Perderás los privilegios de proveedor y serás redirigido a la interfaz de cliente.'
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            Navigator.pop(ctx); // cerrar diálogo
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('user_role', 'client');
+            if (mounted) {
+              // ✅ Limpia toda la pila y establece clientHome como raíz
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeClientScreen()),
+                (route) => false,
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00569D),
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Confirmar'),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00569D),
+        backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false, // ← quita la flecha
         title: const Text(
           'Configuraciones',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: darkGray,
           ),
         ),
       ),
@@ -62,6 +104,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Avatar y nombre
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -118,6 +161,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 24),
 
+            // Información personal
             _buildSectionTitle('Información personal'),
             _buildOptionTile(
               icon: Icons.edit_rounded,
@@ -128,7 +172,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const EditProfileScreen(),
+                    builder: (context) => const ProviderEditProfileScreen(),
                   ),
                 );
               },
@@ -142,7 +186,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ChangePasswordScreen(),
+                    builder: (context) => const ProviderChangePasswordScreen(),
                   ),
                 );
               },
@@ -164,6 +208,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 32),
 
+            // Soporte y ayuda
             _buildSectionTitle('Soporte y ayuda', icon: Icons.support_agent_rounded),
             _buildOptionTile(
               icon: Icons.email_rounded,
@@ -216,7 +261,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // BOTÓN CORREGIDO (CENTRADO)
+            // Botón destacado: Cambiar a cliente (con confirmación)
             Container(
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
@@ -238,22 +283,14 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProviderApplicationScreen(),
-                      ),
-                    );
-                  },
+                  onTap: _showChangeRoleConfirmation,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
                         Text(
-                          'Cambiar a proveedor',
+                          'Cambiar a cliente',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
@@ -268,6 +305,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               ),
             ),
 
+            // Botón de cerrar sesión
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {
@@ -320,6 +358,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: _buildBottomNavBar(), // ← agregamos la barra
     );
   }
 
@@ -414,6 +453,89 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: 3, // Cuenta activa
+        onTap: (index) async {
+          HapticFeedback.lightImpact();
+          switch (index) {
+            case 0:
+              // Ir a inicio (ProviderHomeScreen)
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
+              );
+              break;
+            case 1:
+              // Servicios (placeholder)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sección de servicios en desarrollo'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              break;
+            case 2:
+              // Reservas (placeholder)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sección de reservas en desarrollo'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              break;
+            case 3:
+              // Ya estamos en cuenta
+              break;
+          }
+        },
+        backgroundColor: Colors.white,
+        elevation: 0,
+        selectedItemColor: const Color(0xFF1976D2),
+        unselectedItemColor: mediumGray,
+        selectedLabelStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12,
+        ),
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_rounded),
+            label: 'Servicios',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_rounded),
+            label: 'Reservas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: 'Cuenta',
+          ),
+        ],
       ),
     );
   }

@@ -26,7 +26,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "title": "Servi Favor",
       "subtitle": "Favores personales",
       "icon": Icons.handshake_rounded,
-      "color": primaryBlue,
+      "color": const Color(0xFF00569D),
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
     },
     {
@@ -151,7 +151,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: primaryBlue,
+        selectedItemColor: const Color(0xFF00569D),
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
@@ -183,8 +183,8 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               Container(
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
-                child: Icon(Icons.history_rounded, size: 40, color: primaryBlue),
+                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), shape: BoxShape.circle),
+                child: Icon(Icons.history_rounded, size: 40, color: const Color(0xFF00569D)),
               ),
               const SizedBox(height: 24),
               const Text('No hay actividad reciente',
@@ -231,7 +231,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                         text: const TextSpan(
                           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
                           children: [
-                            TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
+                            TextSpan(text: "Servi", style: TextStyle(color: const Color(0xFF00569D))),
                             TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
                           ],
                         ),
@@ -280,8 +280,8 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                             width: 40,
                             height: 40,
                             decoration:
-                                BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                            child: Icon(Icons.add_location_alt_rounded, color: primaryBlue),
+                                BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                            child: Icon(Icons.add_location_alt_rounded, color: const Color(0xFF00569D)),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -314,7 +314,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: primaryBlue, width: 2)),
+                          borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
                     ),
                   ),
                 ),
@@ -394,7 +394,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       backgroundColor: lightGray,
       appBar: AppBar(
         title: const Text("Mis Reservas"),
-        backgroundColor: primaryBlue,
+        backgroundColor: const Color(0xFF00569D),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -402,7 +402,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.calendar_month_rounded, size: 80, color: primaryBlue.withOpacity(0.5)),
+            Icon(Icons.calendar_month_rounded, size: 80, color: const Color(0xFF00569D).withOpacity(0.5)),
             const SizedBox(height: 20),
             const Text(
               "No tienes reservas activas",
@@ -434,7 +434,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.person, size: 80, color: primaryBlue),
+            const Icon(Icons.person, size: 80, color: const Color(0xFF00569D)),
             const SizedBox(height: 20),
             const Text('Perfil de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),

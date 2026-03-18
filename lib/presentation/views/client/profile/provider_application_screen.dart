@@ -12,16 +12,13 @@ class ProviderApplicationScreen extends StatefulWidget {
 class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controladores para los campos de texto
   final _descripcionController = TextEditingController();
   final _aniosController = TextEditingController();
 
-  // Valores seleccionados
   String? _categoriaSeleccionada;
   String? _subcategoriaSeleccionada;
   String? _tipoServicioSeleccionado;
 
-  // Listas de ejemplo (pueden venir de backend más adelante)
   final List<String> _categorias = ['Hogar', 'Electricidad', 'Jardinería', 'Limpieza'];
   final Map<String, List<String>> _subcategorias = {
     'Hogar': ['Plomería', 'Carpintería', 'Pintura'],
@@ -44,7 +41,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
     'Limpieza de alfombras': ['Hogar', 'Empresas'],
   };
 
-  // Archivo simulado
   bool _archivoCargado = false;
   String _nombreArchivo = '';
 
@@ -71,7 +67,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
 
   void _enviarSolicitud() {
     if (_formKey.currentState!.validate()) {
-      // Aquí iría la lógica real para enviar al backend
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -84,9 +79,9 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                Navigator.pop(context); // Regresar al perfil
+                Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
               child: const Text('Aceptar'),
             ),
           ],
@@ -102,7 +97,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header con logo y botón volver
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
@@ -113,7 +107,7 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: primaryBlue,
+                      color: const Color(0xFF00569D),
                     ),
                   ),
                   ElevatedButton(
@@ -135,7 +129,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
               ),
             ),
 
-            // Contenido principal (formulario)
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -146,20 +139,17 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                     children: [
                       const SizedBox(height: 20),
 
-                      // Título del formulario con subrayado
                       const Text(
                         'Formulario de solicitud para proveedor',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF222222),
-                          decoration: TextDecoration.underline,
                         ),
                       ),
 
                       const SizedBox(height: 30),
 
-                      // Campo: Certificaciones
                       const Text(
                         'Certificaciones',
                         style: TextStyle(
@@ -170,7 +160,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                       ),
                       const SizedBox(height: 8),
 
-                      // Área de carga de archivos
                       GestureDetector(
                         onTap: _simularCargaArchivo,
                         child: Container(
@@ -205,7 +194,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Campo: Descripción profesional
                       const Text(
                         'Descripción profesional',
                         style: TextStyle(
@@ -215,6 +203,7 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
+
                       Container(
                         decoration: BoxDecoration(
                           color: lightGray,
@@ -239,202 +228,40 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Primera fila: Categoría y Subcategoría
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Categoría
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Categoría',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: lightGray,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: DropdownButtonFormField<String>(
-                                    value: _categoriaSeleccionada,
-                                    hint: const Text('Seleccionar'),
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                                    ),
-                                    icon: const Icon(Icons.arrow_drop_down),
-                                    items: _categorias.map((categoria) {
-                                      return DropdownMenuItem(
-                                        value: categoria,
-                                        child: Text(categoria),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _categoriaSeleccionada = value;
-                                        _subcategoriaSeleccionada = null;
-                                        _tipoServicioSeleccionado = null;
-                                      });
-                                    },
-                                    validator: (value) => value == null ? 'Campo requerido' : null,
-                                  ),
-                                ),
-                              ],
+                          const Text(
+                            'Años de experiencia',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF333333),
                             ),
                           ),
-                          const SizedBox(width: 16),
-
-                          // Subcategoría
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Sub Categoría',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: lightGray,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: DropdownButtonFormField<String>(
-                                    value: _subcategoriaSeleccionada,
-                                    hint: const Text('Seleccionar'),
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                                    ),
-                                    icon: const Icon(Icons.arrow_drop_down),
-                                    items: _categoriaSeleccionada != null
-                                        ? _subcategorias[_categoriaSeleccionada!]!.map((sub) {
-                                            return DropdownMenuItem(
-                                              value: sub,
-                                              child: Text(sub),
-                                            );
-                                          }).toList()
-                                        : [],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _subcategoriaSeleccionada = value;
-                                        _tipoServicioSeleccionado = null;
-                                      });
-                                    },
-                                    validator: (value) => value == null ? 'Campo requerido' : null,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: lightGray,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Segunda fila: Tipo de servicio y Años de experiencia
-                      Row(
-                        children: [
-                          // Tipo de servicio
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Tipo de servicio',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: lightGray,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: DropdownButtonFormField<String>(
-                                    value: _tipoServicioSeleccionado,
-                                    hint: const Text('Seleccionar'),
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                                    ),
-                                    icon: const Icon(Icons.arrow_drop_down),
-                                    items: _subcategoriaSeleccionada != null
-                                        ? _tiposServicio[_subcategoriaSeleccionada!]?.map((tipo) {
-                                            return DropdownMenuItem(
-                                              value: tipo,
-                                              child: Text(tipo),
-                                            );
-                                          }).toList() ?? []
-                                        : [],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _tipoServicioSeleccionado = value;
-                                      });
-                                    },
-                                    validator: (value) => value == null ? 'Campo requerido' : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-
-                          // Años de experiencia
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Años de experiencia',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: lightGray,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: TextFormField(
-                                    controller: _aniosController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                      hintText: 'Ej: 5',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Campo requerido';
-                                      }
-                                      if (int.tryParse(value) == null) {
-                                        return 'Número inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
+                            child: TextFormField(
+                              controller: _aniosController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                hintText: 'Ej: 5',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Campo requerido';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Número inválido';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                         ],
@@ -442,7 +269,6 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
 
                       const SizedBox(height: 40),
 
-                      // Botón Aplicar
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -466,7 +292,7 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 20), // Espacio para la barra de sistema
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

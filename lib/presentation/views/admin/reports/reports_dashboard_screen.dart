@@ -66,7 +66,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             title: Text(p),
             value: p,
             groupValue: selectedPeriod,
-            activeColor: primaryBlue,
+            activeColor: const Color(0xFF00569D),
             onChanged: (v) {
               setState(() => selectedPeriod = v!);
               Navigator.pop(context);
@@ -83,7 +83,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Datos actualizados para: $selectedPeriod'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating),
+        SnackBar(content: Text('Datos actualizados para: $selectedPeriod'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating),
       );
     });
   }
@@ -99,8 +99,8 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-              child: Icon(Icons.summarize_rounded, color: primaryBlue),
+              decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              child: Icon(Icons.summarize_rounded, color: const Color(0xFF00569D)),
             ),
             const SizedBox(width: 12),
             Expanded(child: Text('Generar Reporte', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray))),
@@ -113,10 +113,10 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Generando reporte de $reportType...'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating),
+                SnackBar(content: Text('Generando reporte de $reportType...'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
             child: const Text('Generar'),
           ),
         ],
@@ -287,13 +287,13 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                           Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                            child: Icon(Icons.analytics_rounded, color: primaryBlue),
+                            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            child: Icon(Icons.analytics_rounded, color: const Color(0xFF00569D)),
                           ),
                           const SizedBox(width: 16),
                           const Text('Dashboard de Reportes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
                           const Spacer(),
-                          IconButton(onPressed: _refreshData, icon: Icon(Icons.refresh_rounded, color: primaryBlue)),
+                          IconButton(onPressed: _refreshData, icon: Icon(Icons.refresh_rounded, color: const Color(0xFF00569D))),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -305,14 +305,14 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                               borderRadius: BorderRadius.circular(12),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: primaryBlue.withOpacity(0.3))),
+                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00569D).withOpacity(0.3))),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.calendar_today_rounded, color: primaryBlue),
+                                    Icon(Icons.calendar_today_rounded, color: const Color(0xFF00569D)),
                                     const SizedBox(width: 12),
                                     Text(selectedPeriod, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                                     const Spacer(),
-                                    Icon(Icons.arrow_drop_down_rounded, color: primaryBlue),
+                                    Icon(Icons.arrow_drop_down_rounded, color: const Color(0xFF00569D)),
                                   ],
                                 ),
                               ),
@@ -359,7 +359,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryBlue)),
+                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF00569D))),
                       const SizedBox(height: 16),
                       const Text('Actualizando datos...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                     ],

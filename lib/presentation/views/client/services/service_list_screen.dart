@@ -227,7 +227,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         _processBooking(service);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryBlue,
+                        backgroundColor: const Color(0xFF00569D),
                         foregroundColor: Colors.white,
                         minimumSize: const Size(90, 40),
                         shape: RoundedRectangleBorder(
@@ -406,7 +406,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             fontFamily: 'Poppins',
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: primaryBlue,
+            color: const Color(0xFF00569D),
           ),
         ),
         leading: IconButton(
@@ -518,7 +518,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: primaryBlue,
+                          selectedColor: const Color(0xFF00569D),
                           checkmarkColor: Colors.white,
                           labelStyle: TextStyle(
                             fontFamily: 'Roboto',
@@ -528,7 +528,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(color: isSelected ? primaryBlue : mediumGray.withOpacity(0.3)),
+                            side: BorderSide(color: isSelected ? const Color(0xFF00569D) : mediumGray.withOpacity(0.3)),
                           ),
                         ),
                       );
@@ -599,7 +599,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : Colors.white,
+          color: isSelected ? const Color(0xFF00569D) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [BoxShadow(color: cardShadow, blurRadius: 4)],
         ),
@@ -683,7 +683,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                     style: TextStyle(
                       fontFamily: 'Roboto',
                       fontSize: 14,
-                      color: primaryBlue,
+                      color: const Color(0xFF00569D),
                       fontWeight: FontWeight.w500,
                     ),
                   ),

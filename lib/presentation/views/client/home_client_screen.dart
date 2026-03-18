@@ -29,7 +29,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "title": "Servi Favor",
       "subtitle": "Favores personales",
       "icon": Icons.handshake_rounded,
-      "color": primaryBlue,
+      "color": const Color(0xFF00569D),
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
     },
     {
@@ -136,7 +136,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: primaryBlue,
+        selectedItemColor: const Color(0xFF00569D),
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
@@ -176,7 +176,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                         text: const TextSpan(
                           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
                           children: [
-                            TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
+                            TextSpan(text: "Servi", style: TextStyle(color: const Color(0xFF00569D))),
                             TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
                           ],
                         ),
@@ -219,7 +219,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: primaryBlue, width: 2)),
+                          borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
                     ),
                   ),
                 ),
@@ -316,7 +316,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.calendar_month_rounded, size: 80, color: primaryBlue.withOpacity(0.5)),
+            Icon(Icons.calendar_month_rounded, size: 80, color: const Color(0xFF00569D).withOpacity(0.5)),
             const SizedBox(height: 20),
             const Text(
               "No tienes reservas activas",

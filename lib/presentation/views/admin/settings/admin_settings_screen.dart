@@ -60,8 +60,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(Icons.lock_reset_rounded, color: primaryBlue),
+                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                child: Icon(Icons.lock_reset_rounded, color: const Color(0xFF00569D)),
               ),
               const SizedBox(width: 12),
               const Text('Cambiar Contraseña', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
@@ -79,7 +79,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureCurrent,
                     decoration: InputDecoration(
                       labelText: 'Contraseña actual',
-                      prefixIcon: Icon(Icons.lock_outline_rounded, color: primaryBlue),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: const Color(0xFF00569D)),
                       suffixIcon: IconButton(
                         icon: Icon(obscureCurrent ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureCurrent = !obscureCurrent),
@@ -87,7 +87,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
                     ),
                     validator: (v) => v?.isEmpty == true ? 'Requerido' : null,
                   ),
@@ -97,7 +97,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureNew,
                     decoration: InputDecoration(
                       labelText: 'Nueva contraseña',
-                      prefixIcon: Icon(Icons.lock_rounded, color: primaryBlue),
+                      prefixIcon: Icon(Icons.lock_rounded, color: const Color(0xFF00569D)),
                       suffixIcon: IconButton(
                         icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureNew = !obscureNew),
@@ -105,7 +105,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
                     ),
                     validator: (v) {
                       if (v?.isEmpty == true) return 'Requerido';
@@ -119,7 +119,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureConfirm,
                     decoration: InputDecoration(
                       labelText: 'Confirmar contraseña',
-                      prefixIcon: Icon(Icons.lock_rounded, color: primaryBlue),
+                      prefixIcon: Icon(Icons.lock_rounded, color: const Color(0xFF00569D)),
                       suffixIcon: IconButton(
                         icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureConfirm = !obscureConfirm),
@@ -127,7 +127,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
                     ),
                     validator: (v) {
                       if (v?.isEmpty == true) return 'Requerido';
@@ -148,7 +148,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contraseña actualizada'), backgroundColor: Colors.green));
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
               child: const Text('Cambiar'),
             ),
           ],
@@ -170,11 +170,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
             title: Text(lang),
             value: lang,
             groupValue: selectedLanguage,
-            activeColor: primaryBlue,
+            activeColor: const Color(0xFF00569D),
             onChanged: (v) {
               setState(() => selectedLanguage = v!);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Idioma cambiado a $v'), backgroundColor: primaryBlue));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Idioma cambiado a $v'), backgroundColor: const Color(0xFF00569D)));
             },
           )).toList(),
         ),
@@ -195,11 +195,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
             title: Text(theme),
             value: theme,
             groupValue: selectedTheme,
-            activeColor: primaryBlue,
+            activeColor: const Color(0xFF00569D),
             onChanged: (v) {
               setState(() => selectedTheme = v!);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tema cambiado a $v'), backgroundColor: primaryBlue));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tema cambiado a $v'), backgroundColor: const Color(0xFF00569D)));
             },
           )).toList(),
         ),
@@ -215,8 +215,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
           Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: primaryBlue, size: 18),
+            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, color: const Color(0xFF00569D), size: 18),
           ),
           const SizedBox(width: 12),
           Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
@@ -283,7 +283,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
       subtitle: subtitle,
       icon: icon,
       iconColor: iconColor,
-      trailing: Switch(value: value, onChanged: (v) { HapticFeedback.lightImpact(); onChanged(v); }, activeColor: primaryBlue),
+      trailing: Switch(value: value, onChanged: (v) { HapticFeedback.lightImpact(); onChanged(v); }, activeColor: const Color(0xFF00569D)),
     );
   }
 
@@ -329,8 +329,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Icon(Icons.settings_rounded, color: primaryBlue),
+                      decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      child: Icon(Icons.settings_rounded, color: const Color(0xFF00569D)),
                     ),
                     const SizedBox(width: 16),
                     const Text('Configuración', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
@@ -352,7 +352,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               _buildSwitchCard(title: 'Sonidos del Sistema', subtitle: 'Reproducir sonidos', icon: Icons.volume_up_rounded, iconColor: const Color(0xFFFF5722), value: soundEnabled, onChanged: (v) => setState(() => soundEnabled = v)),
               _buildSectionHeader('Acciones', Icons.build_rounded),
               _buildActionCard(title: 'Limpiar Caché', subtitle: 'Libera espacio', icon: Icons.cleaning_services_rounded, iconColor: const Color(0xFFFF9800), onTap: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Caché limpiado'), backgroundColor: Colors.green)); }),
-              _buildActionCard(title: 'Exportar Datos', subtitle: 'Descargar copia', icon: Icons.download_rounded, iconColor: const Color(0xFF607D8B), onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Iniciando exportación...'), backgroundColor: primaryBlue)); }),
+              _buildActionCard(title: 'Exportar Datos', subtitle: 'Descargar copia', icon: Icons.download_rounded, iconColor: const Color(0xFF607D8B), onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Iniciando exportación...'), backgroundColor: const Color(0xFF00569D))); }),
               const SizedBox(height: 32),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -362,7 +362,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, color: primaryBlue),
+                        Icon(Icons.info_outline_rounded, color: const Color(0xFF00569D)),
                         const SizedBox(width: 12),
                         const Text('Información de la Aplicación', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                       ],

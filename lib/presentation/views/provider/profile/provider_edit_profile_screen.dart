@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
+import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
+import 'package:servizone_app/core/routes/app_routes.dart'; 
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+class ProviderEditProfileScreen extends StatefulWidget {
+  const ProviderEditProfileScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  State<ProviderEditProfileScreen> createState() => _ProviderEditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
   String _userName = 'Usuario';
   bool _isLoading = false;
+  int _currentIndex = 3; // Cuenta activa
 
-  // Estados para los modales
   bool _showSuccess = false;
   bool _showError = false;
   String _errorMessage = 'Error al actualizar';
@@ -62,18 +65,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _updateData() async {
-    // Validar con el form (los validadores ya mostrarán SnackBar)
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    // Simular proceso de actualización
     await Future.delayed(const Duration(seconds: 2));
 
-    // Simular éxito/error aleatorio para demostración
     final random = DateTime.now().millisecondsSinceEpoch % 2;
     if (random == 0) {
-      // Éxito
       setState(() {
         _isLoading = false;
         _showSuccess = true;
@@ -85,7 +84,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       });
     } else {
-      // Error
       setState(() {
         _isLoading = false;
         _showError = true;
@@ -96,27 +94,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2), // Fondo gris claro de pantalla
+      backgroundColor: const Color(0xFFF2F2F2),
       body: Stack(
         children: [
           Column(
             children: [
-              // Header blanco de 80px
+              // Header con avatar, nombre y botón Volver azul
               Container(
                 height: 80,
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    // Avatar circular
                     Container(
                       width: 45,
                       height: 45,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFE0E0E0), // gris claro
+                        color: Color(0xFFE0E0E0),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -132,7 +137,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Nombre con @
                     Text(
                       '@$_userName',
                       style: const TextStyle(
@@ -143,7 +147,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // Botón Volver con fondo azul
+                    // Botón Volver azul
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
@@ -168,7 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
 
-              // Contenedor principal con fondo blanco (tarjeta)
+              // Contenido principal
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -191,7 +195,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Título "Editar información" con icono
                           Row(
                             children: [
                               Text(
@@ -213,7 +216,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Campo Correo electrónico
+                          // Campo Correo
                           Text(
                             'Correo electrónico',
                             style: TextStyle(
@@ -226,7 +229,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           Container(
                             height: 50,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100], // fondo gris claro
+                              color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.grey.shade300),
                             ),
@@ -263,7 +266,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                           const SizedBox(height: 20),
 
-                          // Campo Número personal
+                          // Campo Teléfono
                           Text(
                             'Número personal',
                             style: TextStyle(
@@ -317,7 +320,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                           const SizedBox(height: 32),
 
-                          // Botón principal
+                          // Botón Actualizar
                           SizedBox(
                             width: double.infinity,
                             height: 54,
@@ -357,6 +360,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
 
+              // Barra de navegación inferior
+              _buildBottomNavBar(),
+
               // Barra de gestos iOS
               Container(
                 height: 20,
@@ -374,21 +380,74 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
 
-          // Modal de éxito
+          // Modales
           if (_showSuccess)
             _buildModal(
               icon: Icons.check_circle,
               color: Colors.green,
               message: 'Datos actualizados',
             ),
-
-          // Modal de error
           if (_showError)
             _buildModal(
               icon: Icons.cancel,
               color: Colors.red,
               message: _errorMessage,
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) async {
+          HapticFeedback.lightImpact();
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
+              );
+              break;
+            case 1:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sección de servicios en desarrollo'), behavior: SnackBarBehavior.floating),
+              );
+              break;
+            case 2:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sección de reservas en desarrollo'), behavior: SnackBarBehavior.floating),
+              );
+              break;
+            case 3:
+              // Ya estamos en cuenta
+              break;
+          }
+        },
+        backgroundColor: Colors.white,
+        elevation: 0,
+        selectedItemColor: const Color(0xFF1976D2),
+        unselectedItemColor: mediumGray,
+        selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
         ],
       ),
     );
@@ -408,11 +467,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 70,
-                color: color,
-              ),
+              Icon(icon, size: 70, color: color),
               const SizedBox(height: 20),
               Text(
                 message,

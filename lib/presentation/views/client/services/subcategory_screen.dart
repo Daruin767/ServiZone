@@ -84,7 +84,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: primaryBlue,
+            color: const Color(0xFF00569D),
           ),
         ),
         // Sin leading
@@ -229,7 +229,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: primaryBlue,
+        selectedItemColor: const Color(0xFF00569D),
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),

@@ -2,26 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
+import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
+import 'package:servizone_app/core/routes/app_routes.dart'; 
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+class ProviderChangePasswordScreen extends StatefulWidget {
+  const ProviderChangePasswordScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  State<ProviderChangePasswordScreen> createState() => _ProviderChangePasswordScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   String _userName = 'Usuario';
   bool _isLoading = false;
+  int _currentIndex = 3;
 
-  // Estados para los modales
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+
   bool _showSuccess = false;
   bool _showError = false;
-  String _errorMessage = 'Error al actualizar';
+  String _errorMessage = 'Algo salió mal';
 
   @override
   void initState() {
@@ -46,6 +54,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 
+  bool _hasMinLength(String pwd) => pwd.length >= 8;
+  bool _hasUppercase(String pwd) => pwd.contains(RegExp(r'[A-Z]'));
+  bool _hasLowercase(String pwd) => pwd.contains(RegExp(r'[a-z]'));
+  bool _hasNumber(String pwd) => pwd.contains(RegExp(r'[0-9]'));
+  bool _hasSpecial(String pwd) => pwd.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+  bool _passwordsMatch(String pwd, String confirm) => pwd == confirm && confirm.isNotEmpty;
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -61,23 +76,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<void> _updateData() async {
-    // Validar con el form (los validadores ya mostrarán SnackBar)
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _changePassword() async {
+    if (_currentPasswordController.text.isEmpty) {
+      _showErrorSnackBar('Ingresa tu contraseña actual');
+      return;
+    }
+    if (_newPasswordController.text.isEmpty) {
+      _showErrorSnackBar('Ingresa una nueva contraseña');
+      return;
+    }
+    if (_confirmPasswordController.text.isEmpty) {
+      _showErrorSnackBar('Confirma tu nueva contraseña');
+      return;
+    }
+
+    final newPwd = _newPasswordController.text;
+    final confirmPwd = _confirmPasswordController.text;
+
+    if (!_hasMinLength(newPwd)) {
+      _showErrorSnackBar('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (!_hasUppercase(newPwd)) {
+      _showErrorSnackBar('Debe contener al menos una letra mayúscula');
+      return;
+    }
+    if (!_hasLowercase(newPwd)) {
+      _showErrorSnackBar('Debe contener al menos una letra minúscula');
+      return;
+    }
+    if (!_hasNumber(newPwd)) {
+      _showErrorSnackBar('Debe contener al menos un número');
+      return;
+    }
+    if (!_hasSpecial(newPwd)) {
+      _showErrorSnackBar('Debe contener al menos un carácter especial (!@#\$%^&*)');
+      return;
+    }
+    if (!_passwordsMatch(newPwd, confirmPwd)) {
+      _showErrorSnackBar('Las contraseñas no coinciden');
+      return;
+    }
 
     setState(() => _isLoading = true);
-
-    // Simular proceso de actualización
     await Future.delayed(const Duration(seconds: 2));
 
-    // Simular éxito/error aleatorio para demostración
     final random = DateTime.now().millisecondsSinceEpoch % 2;
+    setState(() => _isLoading = false);
+
     if (random == 0) {
-      // Éxito
-      setState(() {
-        _isLoading = false;
-        _showSuccess = true;
-      });
+      setState(() => _showSuccess = true);
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() => _showSuccess = false);
@@ -85,10 +133,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       });
     } else {
-      // Error
       setState(() {
-        _isLoading = false;
         _showError = true;
+        _errorMessage = 'Error al cambiar';
       });
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => _showError = false);
@@ -96,27 +143,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2), // Fondo gris claro de pantalla
+      backgroundColor: const Color(0xFFF2F2F2),
       body: Stack(
         children: [
           Column(
             children: [
-              // Header blanco de 80px
+              // Header con avatar, nombre y botón Volver azul
               Container(
                 height: 80,
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    // Avatar circular
                     Container(
                       width: 45,
                       height: 45,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFE0E0E0), // gris claro
+                        color: Color(0xFFE0E0E0),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -132,7 +186,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Nombre con @
                     Text(
                       '@$_userName',
                       style: const TextStyle(
@@ -143,7 +196,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // Botón Volver con fondo azul
+                    // Botón Volver azul
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
@@ -168,7 +221,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
 
-              // Contenedor principal con fondo blanco (tarjeta)
+              // Contenido principal
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -191,11 +244,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Título "Editar información" con icono
                           Row(
                             children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 22,
+                                color: Colors.grey[700],
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                'Editar información',
+                                'Cambiar contraseña',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 22,
@@ -203,19 +261,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   color: darkGray,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.edit,
-                                size: 20,
-                                color: Colors.grey[600],
-                              ),
                             ],
                           ),
                           const SizedBox(height: 24),
 
-                          // Campo Correo electrónico
+                          // Contraseña actual
                           Text(
-                            'Correo electrónico',
+                            'Contraseña actual',
                             style: TextStyle(
                               fontFamily: 'Roboto',
                               fontSize: 14,
@@ -223,49 +275,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100], // fondo gris claro
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: _emailController,
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                color: darkGray,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'ejemplo@correo.com',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 14,
-                                  color: mediumGray,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El correo es requerido');
-                                  return '';
-                                }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                  _showErrorSnackBar('Correo inválido');
-                                  return '';
-                                }
-                                return null;
-                              },
-                            ),
+                          _buildPasswordField(
+                            controller: _currentPasswordController,
+                            obscureText: _obscureCurrent,
+                            onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
                           ),
 
                           const SizedBox(height: 20),
 
-                          // Campo Número personal
+                          // Contraseña nueva
                           Text(
-                            'Número personal',
+                            'Contraseña nueva',
                             style: TextStyle(
                               fontFamily: 'Roboto',
                               fontSize: 14,
@@ -273,56 +293,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
+                          _buildPasswordField(
+                            controller: _newPasswordController,
+                            obscureText: _obscureNew,
+                            onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Confirmar contraseña
+                          Text(
+                            'Confirmar contraseña',
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              color: darkGray,
                             ),
-                            child: TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                color: darkGray,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Ej: 3001234567',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 14,
-                                  color: mediumGray,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El número es requerido');
-                                  return '';
-                                }
-                                if (value.length < 10) {
-                                  _showErrorSnackBar('El número debe tener al menos 10 dígitos');
-                                  return '';
-                                }
-                                return null;
-                              },
-                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildPasswordField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirm,
+                            onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
                           ),
 
                           const SizedBox(height: 32),
 
-                          // Botón principal
+                          // Botón Cambiar
                           SizedBox(
                             width: double.infinity,
                             height: 54,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _updateData,
+                              onPressed: _isLoading ? null : _changePassword,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF00569D),
                                 foregroundColor: Colors.white,
@@ -341,7 +343,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       ),
                                     )
                                   : const Text(
-                                      'Actualizar datos',
+                                      'Cambiar contraseña',
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 16,
@@ -356,6 +358,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
               ),
+
+              // Barra de navegación inferior
+              _buildBottomNavBar(),
 
               // Barra de gestos iOS
               Container(
@@ -374,21 +379,116 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
 
-          // Modal de éxito
+          // Modales
           if (_showSuccess)
             _buildModal(
               icon: Icons.check_circle,
               color: Colors.green,
-              message: 'Datos actualizados',
+              message: 'Contraseña actualizada',
             ),
-
-          // Modal de error
           if (_showError)
             _buildModal(
               icon: Icons.cancel,
               color: Colors.red,
               message: _errorMessage,
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required bool obscureText,
+    required VoidCallback onToggle,
+  }) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        style: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 14,
+          color: darkGray,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          suffixIcon: IconButton(
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: mediumGray,
+              size: 20,
+            ),
+            onPressed: onToggle,
+          ),
+          hintText: '********',
+          hintStyle: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 14,
+            color: mediumGray,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) async {
+          HapticFeedback.lightImpact();
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
+              );
+              break;
+            case 1:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sección de servicios en desarrollo'), behavior: SnackBarBehavior.floating),
+              );
+              break;
+            case 2:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sección de reservas en desarrollo'), behavior: SnackBarBehavior.floating),
+              );
+              break;
+            case 3:
+              // Ya estamos en cuenta
+              break;
+          }
+        },
+        backgroundColor: Colors.white,
+        elevation: 0,
+        selectedItemColor: const Color(0xFF1976D2),
+        unselectedItemColor: mediumGray,
+        selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
         ],
       ),
     );
@@ -408,11 +508,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 70,
-                color: color,
-              ),
+              Icon(icon, size: 70, color: color),
               const SizedBox(height: 20),
               Text(
                 message,

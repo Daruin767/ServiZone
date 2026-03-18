@@ -17,6 +17,11 @@ class AppRoutes {
   static const String adminDashboard = '/admin/dashboard';
   static const String reservas = '/reservas';
   static const String account = '/account';
+  static const String providerProfile = '/provider/profile';
+  static const String providerEditProfile = '/provider/edit-profile';
+  static const String providerChangePassword = '/provider/change-password';
+  static const String clientApplication = '/provider/client-application';
+  
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {

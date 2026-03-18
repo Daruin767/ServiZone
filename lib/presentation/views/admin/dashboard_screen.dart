@@ -137,9 +137,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(colors: [primaryBlue, lightBlue]),
+                                  gradient: const LinearGradient(colors: [const Color(0xFF00569D), lightBlue]),
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(color: primaryBlue.withOpacity(0.3), blurRadius: 15)],
+                                  boxShadow: [BoxShadow(color: const Color(0xFF00569D).withOpacity(0.3), blurRadius: 15)],
                                 ),
                                 child: const Icon(Icons.admin_panel_settings_rounded, size: 40, color: Colors.white),
                               ),
@@ -148,8 +148,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                               const SizedBox(height: 4),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                                child: const Text('Administrador', style: TextStyle(color: primaryBlue, fontSize: 12, fontWeight: FontWeight.w600)),
+                                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                                child: const Text('Administrador', style: TextStyle(color: const Color(0xFF00569D), fontSize: 12, fontWeight: FontWeight.w600)),
                               ),
                             ],
                           ),
@@ -180,7 +180,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                       decoration: BoxDecoration(
-                                        color: selected ? primaryBlue.withOpacity(0.1) : Colors.transparent,
+                                        color: selected ? const Color(0xFF00569D).withOpacity(0.1) : Colors.transparent,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Row(
@@ -200,13 +200,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                               item.label,
                                               style: TextStyle(
                                                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                                                color: selected ? primaryBlue : darkGray,
+                                                color: selected ? const Color(0xFF00569D) : darkGray,
                                                 fontSize: 15,
                                               ),
                                             ),
                                           ),
                                           if (selected)
-                                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: primaryBlue, shape: BoxShape.circle)),
+                                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: const Color(0xFF00569D), shape: BoxShape.circle)),
                                         ],
                                       ),
                                     ),
@@ -267,8 +267,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                               icon: Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                                child: Icon(Icons.menu_rounded, color: primaryBlue),
+                                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                                child: Icon(Icons.menu_rounded, color: const Color(0xFF00569D)),
                               ),
                             ),
                           ),
@@ -288,7 +288,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                             children: [
                               _buildHeaderIndicator(icon: Icons.notifications_rounded, count: 3, color: Colors.orange),
                               const SizedBox(width: 16),
-                              _buildHeaderIndicator(icon: Icons.message_rounded, count: 7, color: primaryBlue),
+                              _buildHeaderIndicator(icon: Icons.message_rounded, count: 7, color: const Color(0xFF00569D)),
                             ],
                           ),
                         ),
@@ -309,8 +309,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                     Container(
                                       width: 100,
                                       height: 100,
-                                      decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
-                                      child: Icon(Icons.dashboard_rounded, size: 50, color: primaryBlue),
+                                      decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), shape: BoxShape.circle),
+                                      child: Icon(Icons.dashboard_rounded, size: 50, color: const Color(0xFF00569D)),
                                     ),
                                     const SizedBox(height: 24),
                                     const Text('Panel de Administración', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray)),
