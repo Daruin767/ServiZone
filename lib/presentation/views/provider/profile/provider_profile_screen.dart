@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
+import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_edit_profile_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_change_password_screen.dart';
-import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 
@@ -19,6 +20,7 @@ class ProviderProfileScreen extends StatefulWidget {
 
 class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   String _userName = 'Usuario';
+  int _currentIndex = 3; // Cuenta activa
 
   @override
   void initState() {
@@ -43,44 +45,52 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
   void _showChangeRoleConfirmation() {
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('Cambiar a cliente'),
-      content: const Text(
-        '¿Estás seguro de que deseas cambiar a cliente? Perderás los privilegios de proveedor y serás redirigido a la interfaz de cliente.'
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cambiar a cliente'),
+        content: const Text(
+          '¿Estás seguro de que deseas cambiar a cliente? Perderás los privilegios de proveedor y serás redirigido a la interfaz de cliente.'
         ),
-        ElevatedButton(
-          onPressed: () async {
-            Navigator.pop(ctx); // cerrar diálogo
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('user_role', 'client');
-            if (mounted) {
-              // ✅ Limpia toda la pila y establece clientHome como raíz
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeClientScreen()),
-                (route) => false,
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00569D),
-            foregroundColor: Colors.white,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
           ),
-          child: const Text('Confirmar'),
-        ),
-      ],
-    ),
-  );
-}
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx); // cerrar diálogo
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('user_role', 'client');
+              if (mounted) {
+                // Limpiar pila y navegar a cliente
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeClientScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +99,6 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false, // ← quita la flecha
         title: const Text(
           'Configuraciones',
           style: TextStyle(
@@ -98,6 +107,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             color: darkGray,
           ),
         ),
+        automaticallyImplyLeading: false, // Sin flecha de retroceso
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -125,11 +135,11 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00569D),
+                      color: primaryBlue,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF00569D).withOpacity(0.3),
+                          color: primaryBlue.withOpacity(0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -166,7 +176,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             _buildOptionTile(
               icon: Icons.edit_rounded,
               title: 'Editar información personal',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -180,7 +190,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             _buildOptionTile(
               icon: Icons.lock_rounded,
               title: 'Cambiar contraseña',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -194,7 +204,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             _buildOptionTile(
               icon: Icons.history_rounded,
               title: 'Historial de reservas',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -261,19 +271,19 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // Botón destacado: Cambiar a cliente (con confirmación)
+            // Botón destacado: Cambiar a cliente
             Container(
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [const Color(0xFF00569D), lightBlue],
+                  colors: [primaryBlue, lightBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00569D).withOpacity(0.4),
+                    color: primaryBlue.withOpacity(0.4),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -358,7 +368,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(), // ← agregamos la barra
+      bottomNavigationBar: _buildBottomNavBar(), // Barra inferior funcional
     );
   }
 
@@ -368,7 +378,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: const Color(0xFF00569D)),
+            Icon(icon, size: 20, color: primaryBlue),
             const SizedBox(width: 8),
           ],
           Text(
@@ -470,28 +480,24 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: 3, // Cuenta activa
-        onTap: (index) async {
+        currentIndex: _currentIndex,
+        onTap: (index) {
           HapticFeedback.lightImpact();
+          if (index == _currentIndex) return; // evitar navegar a la misma pantalla
           switch (index) {
-            case 0:
-              // Ir a inicio (ProviderHomeScreen)
+            case 0: // Inicio
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
               );
               break;
-            case 1:
-              // Servicios (placeholder)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sección de servicios en desarrollo'),
-                  behavior: SnackBarBehavior.floating,
-                ),
+            case 1: // Servicios
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
               );
               break;
-            case 2:
-              // Reservas (placeholder)
+            case 2: // Reservas
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Sección de reservas en desarrollo'),
@@ -499,8 +505,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                 ),
               );
               break;
-            case 3:
-              // Ya estamos en cuenta
+            case 3: // Cuenta (ya estamos)
+              // No hacer nada
               break;
           }
         },
@@ -519,22 +525,10 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         ),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_rounded),
-            label: 'Servicios',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_rounded),
-            label: 'Reservas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Cuenta',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
         ],
       ),
     );

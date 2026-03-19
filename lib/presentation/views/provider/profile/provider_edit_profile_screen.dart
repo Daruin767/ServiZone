@@ -432,8 +432,15 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
               );
               break;
             case 3:
-              // Ya estamos en cuenta
-              break;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProviderProfileScreen(
+                  onLogout: _logout,
+                ),
+              ),
+            );
+            break;
           }
         },
         backgroundColor: Colors.white,

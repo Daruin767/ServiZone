@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 
 class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
@@ -188,18 +189,25 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
 
                   const SizedBox(height: 8),
                   Center(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Ver todos mis servicios >',
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 14,
-                          color: mediumGray,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProviderServicesScreen(),
                         ),
+                      );
+                    },
+                    child: const Text(
+                      'Ver todos mis servicios >',
+                      style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 14,
+                        color: mediumGray,
                       ),
                     ),
                   ),
+                ),
                   const SizedBox(height: 32),
 
                   _buildSectionTitle('Proximas reservas'),
@@ -475,14 +483,11 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               // Ya estamos en inicio
               break;
             case 1:
-              // Servicios (placeholder)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sección de servicios en desarrollo'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              break;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
+            );
+            break;
             case 2:
               // Reservas (placeholder)
               ScaffoldMessenger.of(context).showSnackBar(
