@@ -78,15 +78,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Future<void> _changePassword() async {
     // Validar campos no vacíos
     if (_currentPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Ingresa tu contraseña actual');
+      _showErrorSnackBar('La contraseña actual es obligatoria');
       return;
     }
     if (_newPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Ingresa una nueva contraseña');
+      _showErrorSnackBar('La nueva contraseña es obligatoria');
       return;
     }
     if (_confirmPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Confirma tu nueva contraseña');
+      _showErrorSnackBar('Debes confirmar la nueva contraseña');
       return;
     }
 
@@ -95,7 +95,27 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     // Validar requisitos de la nueva contraseña
     if (!_hasMinLength(newPwd)) {
-      _showErrorSnackBar('La contraseña debe tener al menos 8 caracteres');
+      _showErrorSnackBar('La nueva contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (!_hasUppercase(newPwd)) {
+      _showErrorSnackBar('La nueva contraseña debe incluir una mayúscula');
+      return;
+    }
+    if (!_hasLowercase(newPwd)) {
+      _showErrorSnackBar('La nueva contraseña debe incluir una minúscula');
+      return;
+    }
+    if (!_hasNumber(newPwd)) {
+      _showErrorSnackBar('La nueva contraseña debe incluir un número');
+      return;
+    }
+    if (!_hasSpecial(newPwd)) {
+      _showErrorSnackBar('La nueva contraseña debe incluir un carácter especial');
+      return;
+    }
+    if (!_passwordsMatch(newPwd, confirmPwd)) {
+      _showErrorSnackBar('Las contraseñas no coinciden');
       return;
     }
     if (!_hasUppercase(newPwd)) {
@@ -197,7 +217,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00569D),
+                        backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(70, 36),
                         shape: RoundedRectangleBorder(
@@ -324,7 +344,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _changePassword,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00569D),
+                                backgroundColor: primaryBlue,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

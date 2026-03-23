@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/presentation/views/client/profile/provider_application_screen.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/core/themes/theme_provider.dart';
+import 'package:servizone_app/main.dart'; // To access global themeProvider
 import 'package:servizone_app/presentation/views/client/profile/edit_profile_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/change_password_screen.dart';
+
+import 'package:servizone_app/presentation/views/common/booking_history_screen.dart';
 
 class ClientProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -35,10 +39,11 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
   }
 
   String _getInitials(String name) {
-    List<String> parts = name.trim().split(' ');
-    if (parts.isEmpty) return 'U';
+    String trimmed = name.trim();
+    if (trimmed.isEmpty) return 'U';
+    List<String> parts = trimmed.split(' ');
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+    return (parts[0].substring(0, 1) + (parts[1].isNotEmpty ? parts[1].substring(0, 1) : '')).toUpperCase();
   }
 
   @override
@@ -46,14 +51,16 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     return Scaffold(
       backgroundColor: lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00569D),
+        backgroundColor: configBlue,
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           'Configuraciones',
           style: TextStyle(
-            fontSize: 24,
+            fontFamily: 'Poppins',
+            fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Colors.white,
           ),
         ),
       ),
@@ -82,11 +89,11 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00569D),
+                      color: primaryBlue,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF00569D).withOpacity(0.3),
+                          color: primaryBlue.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -122,7 +129,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             _buildOptionTile(
               icon: Icons.edit_rounded,
               title: 'Editar información personal',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -134,9 +141,9 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               },
             ),
             _buildOptionTile(
-              icon: Icons.lock_rounded,
+              icon: Icons.lock_reset_rounded,
               title: 'Cambiar contraseña',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -147,16 +154,35 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 );
               },
             ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle('Preferencias'),
+            ListenableBuilder(
+              listenable: themeProvider,
+              builder: (context, _) {
+                return _buildSwitchTile(
+                  icon: Icons.dark_mode_rounded,
+                  title: 'Modo oscuro',
+                  subtitle: 'Alterne la apariencia de la aplicación',
+                  value: themeProvider.isDarkMode,
+                  onChanged: (v) {
+                    HapticFeedback.mediumImpact();
+                    themeProvider.toggleTheme(v);
+                  },
+                );
+              },
+            ),
             _buildOptionTile(
               icon: Icons.history_rounded,
               title: 'Historial de reservas',
-              color: const Color(0xFF00569D),
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidad en desarrollo'),
-                    behavior: SnackBarBehavior.floating,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BookingHistoryScreen(isProvider: false),
                   ),
                 );
               },
@@ -185,7 +211,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               icon: Icons.phone_rounded,
               title: 'Teléfono principal',
               subtitle: '+57 (4) 444-5555',
-              color: Colors.blue,
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Clipboard.setData(const ClipboardData(text: '+57 (4) 444-5555'));
@@ -216,104 +242,51 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // BOTÓN CORREGIDO (CENTRADO)
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [const Color(0xFF00569D), lightBlue],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00569D).withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProviderApplicationScreen(),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          'Cambiar a proveedor',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            _buildOptionTile(
+              icon: Icons.business_center_rounded,
+              title: 'Ser Proveedor',
+              subtitle: 'Ofrece tus servicios en la plataforma',
+              color: primaryBlue,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pushNamed(context, AppRoutes.providerRequest);
+              },
             ),
-
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.heavyImpact();
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: const Text('Cerrar sesión'),
-                      content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancelar'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            widget.onLogout();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Cerrar sesión'),
-                        ),
-                      ],
+            _buildOptionTile(
+              icon: Icons.logout_rounded,
+              title: 'Cerrar sesión',
+              subtitle: 'Salir de tu cuenta de forma segura',
+              color: Colors.red,
+              onTap: () {
+                HapticFeedback.heavyImpact();
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text(
-                  'Cerrar Sesión',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    title: const Text('Cerrar sesión'),
+                    content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancelar'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          widget.onLogout();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Cerrar sesión'),
+                      ),
+                    ],
                   ),
-                ),
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: 20),
@@ -329,7 +302,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: const Color(0xFF00569D)),
+            Icon(icon, size: 20, color: primaryBlue),
             const SizedBox(width: 8),
           ],
           Text(
@@ -378,7 +351,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 24),
@@ -413,6 +386,74 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: cardShadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: primaryBlue, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: darkGray,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: mediumGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeColor: primaryBlue,
+            ),
+          ],
         ),
       ),
     );

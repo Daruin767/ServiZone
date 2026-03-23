@@ -5,6 +5,7 @@ import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/client/services/subcategory_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
+import 'package:servizone_app/presentation/views/client/client_bookings_screen.dart';
 
 class HomeClientScreen extends StatefulWidget {
   final int initialIndex;
@@ -29,7 +30,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "title": "Servi Favor",
       "subtitle": "Favores personales",
       "icon": Icons.handshake_rounded,
-      "color": const Color(0xFF00569D),
+      "color": primaryBlue,
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
     },
     {
@@ -116,6 +117,33 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     ];
 
     return Scaffold(
+      backgroundColor: lightGray,
+      appBar: _currentIndex == 1 ? null : AppBar(
+        title: Text(
+          _currentIndex == 0 ? "Mis Reservas" : "Mi Perfil",
+          style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: darkGray,
+        elevation: 0,
+        actions: _currentIndex == 0 ? [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.filter_list_rounded),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Usa los filtros rápidos en la parte superior de la lista'),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                  ),
+                );
+              },
+            ),
+          ),
+        ] : null,
+      ),
       body: screens[_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
@@ -133,13 +161,17 @@ class _HomeClientScreenState extends State<HomeClientScreen>
           HapticFeedback.lightImpact();
           if (index == _currentIndex) return;
           setState(() => _currentIndex = index);
+          _fadeController.reset();
+          _slideController.reset();
+          _fadeController.forward();
+          _slideController.forward();
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: const Color(0xFF00569D),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
@@ -150,111 +182,178 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
+  void _showSearchDialog(BuildContext context) {
+    final searchController = TextEditingController(text: searchQuery);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Buscar Servicios'),
+        content: TextField(
+          controller: searchController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Ej: Plomería, Mascotas...',
+            prefixIcon: Icon(Icons.search_rounded),
+          ),
+          onSubmitted: (value) {
+            setState(() => searchQuery = value);
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() => searchQuery = "");
+              Navigator.pop(context);
+            },
+            child: const Text('Limpiar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => searchQuery = searchController.text);
+              Navigator.pop(context);
+            },
+            child: const Text('Buscar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Pantalla Servicios (categorías)
   Widget _buildSolicitudScreen() {
-    final filteredCategories = categories
-        .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
+    final filteredCategories = categories.where((category) {
+      final titleMatch = category["title"].toLowerCase().contains(searchQuery.toLowerCase());
+      final subtitleMatch = category["subtitle"].toLowerCase().contains(searchQuery.toLowerCase());
+      return titleMatch || subtitleMatch;
+    }).toList();
 
-    return Scaffold(
-      backgroundColor: lightGray,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            pinned: true,
-            backgroundColor: Colors.white,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: Colors.white,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      RichText(
-                        text: const TextSpan(
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
-                          children: [
-                            TextSpan(text: "Servi", style: TextStyle(color: const Color(0xFF00569D))),
-                            TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
-                          ],
-                        ),
-                      ),
-                      const Text('Tu plataforma de servicios', style: TextStyle(color: mediumGray)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            actions: [
-              Container(
-                margin: const EdgeInsets.only(right: 16),
-                child: IconButton(
-                  icon: Stack(
-                    children: [
-                      Icon(Icons.notifications_none_rounded, color: darkGray),
-                      const Positioned(
-                          right: 0, top: 0, child: CircleAvatar(radius: 4, backgroundColor: Colors.red)),
-                    ],
-                  ),
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  child: TextField(
-                    onChanged: (v) => setState(() => searchQuery = v),
-                    decoration: InputDecoration(
-                      hintText: "¿Qué servicio necesitas?",
-                      prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.displayLarge,
+                      children: [
+                        const TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
+                        TextSpan(text: "Zone", style: TextStyle(color: darkGray.withOpacity(0.8))),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      const Text('Categorías de Servicios',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
-                      const Spacer(),
-                      Text('${filteredCategories.length} servicios', style: TextStyle(color: mediumGray)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildCategoryCard(filteredCategories[index]),
-                childCount: filteredCategories.length,
+                  Text('Tu plataforma de servicios', 
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'Roboto')),
+                ],
               ),
             ),
+            const SizedBox(height: 30),
+
+            // Barra de Búsqueda
+            _buildSearchBar(),
+
+            const SizedBox(height: 30),
+
+            // Título de Categorías
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Text('Categorías de Servicios',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const Spacer(),
+                  Text('${filteredCategories.length} servicios', 
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'Roboto')),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Grid de Categorías
+            Expanded(
+              child: filteredCategories.isEmpty
+                  ? _buildNoResults()
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 15,
+                        mainAxisSpacing: 15,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: filteredCategories.length,
+                      itemBuilder: (context, index) => _buildCategoryCard(filteredCategories[index]),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 54,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search_rounded, color: mediumGray),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              onChanged: (value) => setState(() => searchQuery = value),
+              onSubmitted: (value) {
+                // Aquí se podría navegar a una pantalla de resultados global
+                // Por ahora el filtrado es reactivo en el grid
+              },
+              decoration: const InputDecoration(
+                hintText: 'Buscar servicios...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: mediumGray),
+              ),
+            ),
+          ),
+          if (searchQuery.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.close_rounded, size: 20, color: mediumGray),
+              onPressed: () => setState(() => searchQuery = ""),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off_rounded, size: 80, color: mediumGray.withOpacity(0.3)),
+          const SizedBox(height: 16),
+          const Text('No se encontraron resultados', style: TextStyle(fontWeight: FontWeight.bold, color: darkGray)),
+          const Text('Intenta con otra palabra clave', style: TextStyle(color: mediumGray)),
         ],
       ),
     );
@@ -292,9 +391,13 @@ class _HomeClientScreenState extends State<HomeClientScreen>
               ),
               const Spacer(),
               Text(category["title"],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(category["subtitle"], style: TextStyle(color: Colors.white.withOpacity(0.8))),
+              Text(category["subtitle"], 
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withOpacity(0.8),
+                    fontFamily: 'Roboto',
+                  )),
             ],
           ),
         ),
@@ -302,44 +405,25 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // Pantalla Reservas (placeholder)
+  // Pantalla Reservas
   Widget _buildReservasScreen() {
-    return Scaffold(
-      backgroundColor: lightGray,
-      appBar: AppBar(
-        title: const Text("Mis Reservas"),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.calendar_month_rounded, size: 80, color: const Color(0xFF00569D).withOpacity(0.5)),
-            const SizedBox(height: 20),
-            const Text(
-              "No tienes reservas activas",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: darkGray),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Las reservas que realices aparecerán aquí",
-              style: TextStyle(color: mediumGray),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () => setState(() => _currentIndex = 1),
-              child: const Text("Explorar servicios"),
-            ),
-          ],
-        ),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: const ClientBookingsScreen(),
       ),
     );
   }
 
   // Pantalla Cuenta (usa ClientProfileScreen)
   Widget _buildAccountScreen() {
-    return ClientProfileScreen(onLogout: _logout);
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: ClientProfileScreen(onLogout: _logout),
+      ),
+    );
   }
 }

@@ -213,8 +213,11 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                             Container(
                               width: 40,
                               height: 40,
-                              decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                              child: Icon(Icons.edit_rounded, color: const Color(0xFF00569D)),
+                              decoration: BoxDecoration(
+                                color: secondaryBlue.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.person_rounded, color: secondaryBlue, size: 24),
                             ),
                             const SizedBox(width: 16),
                             const Text('Editar Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray)),
@@ -242,7 +245,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                                       const Text('Estados del Usuario', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                                       const SizedBox(height: 16),
                                       _buildStatusSwitch('Activo', _status1, (v) => setDialogState(() => _status1 = v), Colors.green),
-                                      _buildStatusSwitch('Verificado', _status2, (v) => setDialogState(() => _status2 = v), const Color(0xFF00569D)),
+                                      _buildStatusSwitch('Verificado', _status2, (v) => setDialogState(() => _status2 = v), primaryBlue),
                                       _buildStatusSwitch('Premium', _status3, (v) => setDialogState(() => _status3 = v), Colors.orange),
                                     ],
                                   ),
@@ -266,7 +269,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                 ),
                 if (_showLoading)
                   Container(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     child: const Center(child: CircularProgressIndicator()),
                   ),
               ],
@@ -293,11 +296,11 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
       validator: (value) => value == null || value.isEmpty ? 'Campo requerido' : null,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: const Color(0xFF00569D)),
+        prefixIcon: Icon(icon, color: primaryBlue),
         filled: true,
         fillColor: lightGray,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
       ),
     );
   }
@@ -309,8 +312,27 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: darkGray)),
-          Switch(value: value, onChanged: onChanged, activeColor: color),
+          Switch(
+            value: value, 
+            onChanged: onChanged, 
+            activeColor: color,
+            activeTrackColor: color.withValues(alpha: 0.5),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUserStatusLabel(String label, bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green : Colors.red,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -347,14 +369,25 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(colors: [const Color(0xFF00569D), lightBlue]),
+                                gradient: const LinearGradient(
+                                  colors: [primaryBlue, secondaryBlue],
+                                ),
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: const Color(0xFF00569D).withOpacity(0.3), blurRadius: 10)],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryBlue.withValues(alpha: 0.3),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
                               child: Center(
                                 child: Text(
                                   user.name.substring(0, 1).toUpperCase(),
-                                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -407,7 +440,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                           children: [
                             _buildStatusChip('Activo', user.status1, Colors.green),
                             const SizedBox(width: 8),
-                            _buildStatusChip('Verificado', user.status2, const Color(0xFF00569D)),
+                            _buildStatusChip('Verificado', user.status2, primaryBlue),
                             const SizedBox(width: 8),
                             _buildStatusChip('Premium', user.status3, Colors.orange),
                           ],
@@ -425,16 +458,24 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
   }
 
   Widget _buildStatusChip(String label, bool isActive, Color color) {
+    String displayLabel = label;
+    if (!isActive) {
+      if (label == 'Activo') displayLabel = 'Inactivo';
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? color.withOpacity(0.1) : mediumGray.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isActive ? color.withOpacity(0.3) : mediumGray.withOpacity(0.3)),
+        color: isActive ? color : mediumGray,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isActive ? color : mediumGray),
+        displayLabel,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -459,16 +500,16 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                           Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                            child: Icon(Icons.group_rounded, color: const Color(0xFF00569D)),
+                            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            child: Icon(Icons.group_rounded, color: primaryBlue),
                           ),
                           const SizedBox(width: 16),
                           const Text('Gestión de Usuarios', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                            child: Text('${filteredUsers.length} usuarios', style: TextStyle(color: const Color(0xFF00569D), fontSize: 14, fontWeight: FontWeight.w600)),
+                            decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                            child: Text('${filteredUsers.length} usuarios', style: TextStyle(color: primaryBlue, fontSize: 14, fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ),
@@ -485,7 +526,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                           filled: true,
                           fillColor: lightGray,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
                         ),
                       ),
                     ],
@@ -503,7 +544,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                               Container(
                                 width: 80,
                                 height: 80,
-                                decoration: BoxDecoration(color: mediumGray.withOpacity(0.1), shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: mediumGray.withValues(alpha: 0.1), shape: BoxShape.circle),
                                 child: Icon(searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.group_rounded, size: 40, color: mediumGray),
                               ),
                               const SizedBox(height: 20),
@@ -525,7 +566,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
           ),
           if (_showLoading)
             Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],

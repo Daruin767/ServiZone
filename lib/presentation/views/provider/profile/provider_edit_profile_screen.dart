@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
+import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart'; 
@@ -151,7 +153,7 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00569D),
+                        backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(70, 36),
                         shape: RoundedRectangleBorder(
@@ -252,66 +254,45 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El correo es requerido');
-                                  return '';
+                                  return 'El correo electrónico es obligatorio';
                                 }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                  _showErrorSnackBar('Correo inválido');
-                                  return '';
+                                if (!value.contains('@')) {
+                                  return 'Ingresa un correo electrónico válido';
                                 }
                                 return null;
                               },
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
 
-                          // Campo Teléfono
-                          Text(
-                            'Número personal',
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: darkGray,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
+                          // Teléfono
                           Container(
-                            height: 50,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                color: darkGray,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Ej: 3001234567',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 14,
-                                  color: mediumGray,
-                                ),
+                              decoration: const InputDecoration(
+                                hintText: 'Número de celular',
+                                prefixIcon: Icon(Icons.phone_rounded, color: mediumGray),
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El número es requerido');
-                                  return '';
+                                  return 'El número de celular es obligatorio';
                                 }
                                 if (value.length < 10) {
-                                  _showErrorSnackBar('El número debe tener al menos 10 dígitos');
-                                  return '';
+                                  return 'El celular debe tener al menos 10 dígitos';
                                 }
                                 return null;
                               },
@@ -327,7 +308,7 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _updateData,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00569D),
+                                backgroundColor: primaryBlue,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -412,8 +393,9 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
       ),
       child: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) async {
+        onTap: (index) {
           HapticFeedback.lightImpact();
+          if (index == _currentIndex) return;
           switch (index) {
             case 0:
               Navigator.pushReplacement(
@@ -422,30 +404,32 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
               );
               break;
             case 1:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sección de servicios en desarrollo'), behavior: SnackBarBehavior.floating),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
               );
               break;
             case 2:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sección de reservas en desarrollo'), behavior: SnackBarBehavior.floating),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderBookingsScreen()),
               );
               break;
             case 3:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProviderProfileScreen(
-                  onLogout: _logout,
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProviderProfileScreen(
+                    onLogout: _logout,
+                  ),
                 ),
-              ),
-            );
-            break;
+              );
+              break;
           }
         },
         backgroundColor: Colors.white,
         elevation: 0,
-        selectedItemColor: const Color(0xFF1976D2),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
 import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
 import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_edit_profile_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_change_password_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
+
+import 'package:servizone_app/presentation/views/common/booking_history_screen.dart';
 
 class ProviderProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -97,14 +100,16 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     return Scaffold(
       backgroundColor: lightGray,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: configBlue,
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           'Configuraciones',
           style: TextStyle(
-            fontSize: 24,
+            fontFamily: 'Poppins',
+            fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: darkGray,
+            color: Colors.white,
           ),
         ),
         automaticallyImplyLeading: false, // Sin flecha de retroceso
@@ -139,7 +144,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: primaryBlue.withOpacity(0.3),
+                          color: primaryBlue.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -207,10 +212,10 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidad en desarrollo'),
-                    behavior: SnackBarBehavior.floating,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BookingHistoryScreen(isProvider: true),
                   ),
                 );
               },
@@ -240,7 +245,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               icon: Icons.phone_rounded,
               title: 'Teléfono principal',
               subtitle: '+57 (4) 444-5555',
-              color: Colors.blue,
+              color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Clipboard.setData(const ClipboardData(text: '+57 (4) 444-5555'));
@@ -276,14 +281,14 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [primaryBlue, lightBlue],
+                  colors: [primaryBlue, secondaryBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryBlue.withOpacity(0.4),
+                    color: primaryBlue.withValues(alpha: 0.4),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -427,7 +432,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 24),
@@ -488,20 +493,33 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             case 0: // Inicio
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const ProviderHomeScreen(),
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
               );
               break;
             case 1: // Servicios
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const ProviderServicesScreen(),
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
               );
               break;
             case 2: // Reservas
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sección de reservas en desarrollo'),
-                  behavior: SnackBarBehavior.floating,
+              Navigator.pushReplacement(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const ProviderBookingsScreen(),
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
                 ),
               );
               break;
@@ -512,15 +530,15 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         },
         backgroundColor: Colors.white,
         elevation: 0,
-        selectedItemColor: const Color(0xFF1976D2),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(
-          fontFamily: 'Roboto',
+          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Roboto',
+          fontFamily: 'Poppins',
           fontSize: 12,
         ),
         type: BottomNavigationBarType.fixed,

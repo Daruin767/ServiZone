@@ -42,7 +42,7 @@ dependencies:
   table_calendar: ^3.1.2
   
   # ------------------- FECHAS -------------------
-  intl: ^0.19.0
+  intl: ^0.20.2
   
   # ------------------- VALIDACIÓN -------------------
   form_validator: ^2.1.1
@@ -53,6 +53,9 @@ dependencies:
   # ------------------- ÍCONOS -------------------
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.7.0
+  url_launcher: ^6.3.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

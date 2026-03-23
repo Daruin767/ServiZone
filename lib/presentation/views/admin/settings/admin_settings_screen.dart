@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/themes/theme_provider.dart';
+import 'package:servizone_app/main.dart'; // For global themeProvider
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -60,8 +62,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(Icons.lock_reset_rounded, color: const Color(0xFF00569D)),
+                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                child: Icon(Icons.lock_reset_rounded, color: primaryBlue),
               ),
               const SizedBox(width: 12),
               const Text('Cambiar Contraseña', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
@@ -79,7 +81,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureCurrent,
                     decoration: InputDecoration(
                       labelText: 'Contraseña actual',
-                      prefixIcon: Icon(Icons.lock_outline_rounded, color: const Color(0xFF00569D)),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: primaryBlue),
                       suffixIcon: IconButton(
                         icon: Icon(obscureCurrent ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureCurrent = !obscureCurrent),
@@ -87,7 +89,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
                     ),
                     validator: (v) => v?.isEmpty == true ? 'Requerido' : null,
                   ),
@@ -97,7 +99,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureNew,
                     decoration: InputDecoration(
                       labelText: 'Nueva contraseña',
-                      prefixIcon: Icon(Icons.lock_rounded, color: const Color(0xFF00569D)),
+                      prefixIcon: Icon(Icons.lock_rounded, color: primaryBlue),
                       suffixIcon: IconButton(
                         icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureNew = !obscureNew),
@@ -105,7 +107,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
                     ),
                     validator: (v) {
                       if (v?.isEmpty == true) return 'Requerido';
@@ -119,7 +121,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     obscureText: obscureConfirm,
                     decoration: InputDecoration(
                       labelText: 'Confirmar contraseña',
-                      prefixIcon: Icon(Icons.lock_rounded, color: const Color(0xFF00569D)),
+                      prefixIcon: Icon(Icons.lock_rounded, color: primaryBlue),
                       suffixIcon: IconButton(
                         icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setDialogState(() => obscureConfirm = !obscureConfirm),
@@ -127,7 +129,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                       filled: true,
                       fillColor: lightGray,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 2)),
                     ),
                     validator: (v) {
                       if (v?.isEmpty == true) return 'Requerido';
@@ -148,7 +150,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contraseña actualizada'), backgroundColor: Colors.green));
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
               child: const Text('Cambiar'),
             ),
           ],
@@ -170,11 +172,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
             title: Text(lang),
             value: lang,
             groupValue: selectedLanguage,
-            activeColor: const Color(0xFF00569D),
+            activeColor: primaryBlue,
             onChanged: (v) {
               setState(() => selectedLanguage = v!);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Idioma cambiado a $v'), backgroundColor: const Color(0xFF00569D)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Idioma cambiado a $v'), backgroundColor: primaryBlue));
             },
           )).toList(),
         ),
@@ -195,11 +197,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
             title: Text(theme),
             value: theme,
             groupValue: selectedTheme,
-            activeColor: const Color(0xFF00569D),
+            activeColor: primaryBlue,
             onChanged: (v) {
               setState(() => selectedTheme = v!);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tema cambiado a $v'), backgroundColor: const Color(0xFF00569D)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tema cambiado a $v'), backgroundColor: primaryBlue));
             },
           )).toList(),
         ),
@@ -215,8 +217,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
           Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: const Color(0xFF00569D), size: 18),
+            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, color: primaryBlue, size: 18),
           ),
           const SizedBox(width: 12),
           Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
@@ -283,7 +285,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
       subtitle: subtitle,
       icon: icon,
       iconColor: iconColor,
-      trailing: Switch(value: value, onChanged: (v) { HapticFeedback.lightImpact(); onChanged(v); }, activeColor: const Color(0xFF00569D)),
+      trailing: Switch(value: value, onChanged: (v) { HapticFeedback.lightImpact(); onChanged(v); }, activeColor: primaryBlue),
     );
   }
 
@@ -329,8 +331,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Icon(Icons.settings_rounded, color: const Color(0xFF00569D)),
+                      decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      child: Icon(Icons.settings_rounded, color: primaryBlue),
                     ),
                     const SizedBox(width: 16),
                     const Text('Configuración', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
@@ -339,20 +341,34 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               ),
               _buildSectionHeader('Notificaciones', Icons.notifications_rounded),
               _buildSwitchCard(title: 'Notificaciones Generales', subtitle: 'Recibir todas las notificaciones', icon: Icons.notifications_active_rounded, iconColor: const Color(0xFF4CAF50), value: notificationsEnabled, onChanged: (v) => setState(() => notificationsEnabled = v)),
-              _buildSwitchCard(title: 'Notificaciones por Email', subtitle: 'Recibir notificaciones en tu correo', icon: Icons.email_rounded, iconColor: const Color(0xFF2196F3), value: emailNotifications, onChanged: (v) => setState(() => emailNotifications = v)),
+              _buildSwitchCard(title: 'Notificaciones por Email', subtitle: 'Recibir notificaciones en tu correo', icon: Icons.email_rounded, iconColor: primaryBlue, value: emailNotifications, onChanged: (v) => setState(() => emailNotifications = v)),
               _buildSwitchCard(title: 'Notificaciones Push', subtitle: 'Notificaciones instantáneas', icon: Icons.push_pin_rounded, iconColor: const Color(0xFFFF9800), value: pushNotifications, onChanged: (v) => setState(() => pushNotifications = v)),
               _buildSectionHeader('Seguridad', Icons.security_rounded),
               _buildActionCard(title: 'Cambiar Contraseña', subtitle: 'Actualiza tu contraseña', icon: Icons.lock_reset_rounded, iconColor: const Color(0xFFE91E63), onTap: _showChangePasswordDialog),
               _buildSwitchCard(title: 'Autenticación de Dos Factores', subtitle: 'Seguridad adicional', icon: Icons.security_rounded, iconColor: const Color(0xFF673AB7), value: twoFactorEnabled, onChanged: (v) => setState(() => twoFactorEnabled = v)),
-              _buildSectionHeader('Personalización', Icons.palette_rounded),
+              _buildSectionHeader('Apariencia', Icons.palette_rounded),
               _buildActionCard(title: 'Idioma', subtitle: 'Cambia el idioma', icon: Icons.language_rounded, iconColor: const Color(0xFF00BCD4), onTap: _showLanguageSelector, actionText: selectedLanguage),
-              _buildActionCard(title: 'Tema', subtitle: 'Cambia la apariencia', icon: Icons.brightness_6_rounded, iconColor: const Color(0xFF9C27B0), onTap: _showThemeSelector, actionText: selectedTheme),
+              ListenableBuilder(
+                listenable: themeProvider,
+                builder: (context, _) {
+                  return _buildSwitchCard(
+                    title: 'Modo oscuro',
+                    subtitle: 'Activar tema oscuro en toda la aplicación',
+                    icon: Icons.dark_mode_rounded,
+                    iconColor: primaryBlue,
+                    value: themeProvider.isDarkMode,
+                    onChanged: (v) {
+                      themeProvider.toggleTheme(v);
+                    },
+                  );
+                },
+              ),
               _buildSectionHeader('Sistema', Icons.storage_rounded),
               _buildSwitchCard(title: 'Respaldo Automático', subtitle: 'Copia de seguridad automática', icon: Icons.backup_rounded, iconColor: const Color(0xFF4CAF50), value: autoBackup, onChanged: (v) => setState(() => autoBackup = v)),
               _buildSwitchCard(title: 'Sonidos del Sistema', subtitle: 'Reproducir sonidos', icon: Icons.volume_up_rounded, iconColor: const Color(0xFFFF5722), value: soundEnabled, onChanged: (v) => setState(() => soundEnabled = v)),
               _buildSectionHeader('Acciones', Icons.build_rounded),
               _buildActionCard(title: 'Limpiar Caché', subtitle: 'Libera espacio', icon: Icons.cleaning_services_rounded, iconColor: const Color(0xFFFF9800), onTap: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Caché limpiado'), backgroundColor: Colors.green)); }),
-              _buildActionCard(title: 'Exportar Datos', subtitle: 'Descargar copia', icon: Icons.download_rounded, iconColor: const Color(0xFF607D8B), onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Iniciando exportación...'), backgroundColor: const Color(0xFF00569D))); }),
+              _buildActionCard(title: 'Exportar Datos', subtitle: 'Descargar copia', icon: Icons.download_rounded, iconColor: const Color(0xFF607D8B), onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Iniciando exportación...'), backgroundColor: primaryBlue)); }),
               const SizedBox(height: 32),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -362,7 +378,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, color: const Color(0xFF00569D)),
+                        Icon(Icons.info_outline_rounded, color: primaryBlue),
                         const SizedBox(width: 12),
                         const Text('Información de la Aplicación', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                       ],

@@ -81,7 +81,7 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                 Navigator.pop(ctx);
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
               child: const Text('Aceptar'),
             ),
           ],
@@ -107,7 +107,7 @@ class _ProviderApplicationScreenState extends State<ProviderApplicationScreen> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF00569D),
+                      color: primaryBlue,
                     ),
                   ),
                   ElevatedButton(

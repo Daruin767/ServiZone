@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/client/services/service_detail_screen.dart';
 
 class ServiceListScreen extends StatefulWidget {
   final String categoryName;
   final String subcategoryName;
+  final bool isGuest;
 
   const ServiceListScreen({
     super.key,
     required this.categoryName,
     required this.subcategoryName,
+    this.isGuest = false,
   });
 
   @override
@@ -24,9 +27,41 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   final Set<String> _selectedTypes = {};
 
   // Estados para los modales de éxito/error
+  bool _isLoading = false;
   bool _showSuccess = false;
   bool _showError = false;
-  String _errorMessage = 'Error al reservar';
+  String _errorMessage = 'Algo salió mal';
+
+  void _showNotification(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(20),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 
   final Map<String, List<Map<String, dynamic>>> _servicesBySubcategory = {
     'Plomería': [
@@ -67,7 +102,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         'price': 35000,
         'rating': 4.7,
         'type': 'Mantenimiento',
-        'iconColor': Colors.blue,
+        'iconColor': primaryBlue,
         'icon': Icons.water_drop,
       },
       {
@@ -153,243 +188,175 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     super.dispose();
   }
 
-  void _showBookingDialog(Map<String, dynamic> service) {
-    // Lista de reseñas de ejemplo
-    final List<Map<String, String>> reviews = [
-      {
-        'name': 'Marlon Paez',
-        'comment': 'Excelente corte, muy profesional',
-      },
-      {
-        'name': 'Felipe Mazo',
-        'comment': 'Me encanta lo que hace con mi cabello, es mi peluquero favorito, sabe lo que necesito',
-      },
-    ];
-
+  void _showGuestLoginModal() {
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          width: double.infinity,
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
-          child: Column(
+        title: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: primaryBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+              child: const Icon(Icons.lock_outline_rounded, color: primaryBlue, size: 40),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '¡Inicia sesión para reservar!',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        content: const Text(
+          'Para poder agendar este servicio y gestionar tus reservas, necesitas tener una cuenta en ServiZone.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 15,
+            color: darkGray,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        actions: [
+          Column(
             children: [
-              // Ícono grande en la parte superior
-              Container(
-                margin: const EdgeInsets.only(top: 24, bottom: 8),
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: service['iconColor'].withOpacity(0.2),
-                  child: Icon(
-                    service['icon'],
-                    size: 50,
-                    color: service['iconColor'],
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pushNamed(context, '/auth/login');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
+                  child: const Text('Iniciar Sesión', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
-              // Título y botón
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            service['name'],
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: darkGray,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            service['professional'],
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: mediumGray,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        _processBooking(service);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00569D),
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(90, 40),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Reservar'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Divider(height: 1, thickness: 1, color: lightGray),
-              // Contenido scrolleable
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Calificación con estrellas
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                          const SizedBox(width: 4),
-                          Text(
-                            service['rating'].toString(),
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: darkGray,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '(15 reseñas)',
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: mediumGray,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Detalles del servicio
-                      const Text(
-                        'Detalles del servicio',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: darkGray,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        service['description'],
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 14,
-                          color: darkGray,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Costo: \$${service['price'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: darkGray,
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-                      const Divider(height: 1, thickness: 1, color: lightGray),
-
-                      // Reseñas
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Reseñas',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: darkGray,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '(15 reseñas)',
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 14,
-                          color: mediumGray,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Lista de reseñas
-                      ...reviews.map((review) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  review['name']!,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: darkGray,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  review['comment']!,
-                                  style: TextStyle(
-                                    fontFamily: 'Roboto',
-                                    fontSize: 14,
-                                    color: mediumGray,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                    ],
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: primaryBlue),
+                    foregroundColor: primaryBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
+                  child: const Text('Continuar explorando', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  void _showBookingDialog(Map<String, dynamic> service) {
+    if (widget.isGuest) {
+      _showGuestLoginModal();
+      return;
+    }
+    
+    // Nueva pantalla de detalle con estilo minimalista
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ServiceDetailScreen(service: service),
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(String label, String value, {bool isRating = false, double? rating, Color? textColor}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 12,
+              color: mediumGray,
+            ),
+          ),
+          const SizedBox(height: 6),
+          if (isRating && rating != null)
+            Row(
+              children: [
+                ...List.generate(5, (index) => Icon(
+                  index < rating.floor() ? Icons.star_rounded : Icons.star_outline_rounded,
+                  color: Colors.amber,
+                  size: 18,
+                )),
+                const SizedBox(width: 8),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: darkGray,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: textColor ?? darkGray,
+              ),
+            ),
+        ],
       ),
     );
   }
 
   void _processBooking(Map<String, dynamic> service) async {
-    // Simular proceso de reserva
-    await Future.delayed(const Duration(seconds: 1));
+    setState(() => _isLoading = true);
 
-    // Simular éxito/error aleatorio
-    final random = DateTime.now().millisecondsSinceEpoch % 2;
-    if (random == 0) {
-      // Éxito
-      setState(() => _showSuccess = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _showSuccess = false);
-      });
-    } else {
-      // Error
-      setState(() {
-        _showError = true;
-        _errorMessage = 'No se pudo realizar la reserva';
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _showError = false);
-      });
+    try {
+      // Simular proceso de reserva con delay
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Simular diferentes respuestas del servidor de forma aleatoria para testing
+      final random = DateTime.now().millisecondsSinceEpoch % 6;
+      
+      if (random == 0) {
+        _showNotification('Reserva creada con éxito');
+      } else if (random == 1) {
+        throw 'Error 400: Datos de reserva inválidos';
+      } else if (random == 2) {
+        throw 'Error 401: Sesión expirada, por favor ingresa nuevamente';
+      } else if (random == 3) {
+        throw 'Error 404: El servicio ya no está disponible';
+      } else if (random == 4) {
+        throw 'Error 500: Error interno del servidor, intenta más tarde';
+      } else {
+        throw 'Error de conexión: Tiempo de espera agotado';
+      }
+    } catch (e) {
+      _showNotification(e.toString(), isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -406,7 +373,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             fontFamily: 'Poppins',
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF00569D),
+            color: primaryBlue,
           ),
         ),
         leading: IconButton(
@@ -518,7 +485,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                             });
                           },
                           backgroundColor: Colors.white,
-                          selectedColor: const Color(0xFF00569D),
+                          selectedColor: primaryBlue,
                           checkmarkColor: Colors.white,
                           labelStyle: TextStyle(
                             fontFamily: 'Roboto',
@@ -528,7 +495,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(color: isSelected ? const Color(0xFF00569D) : mediumGray.withOpacity(0.3)),
+                            side: BorderSide(color: isSelected ? primaryBlue : mediumGray.withOpacity(0.3)),
                           ),
                         ),
                       );
@@ -568,20 +535,34 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             ],
           ),
 
-          // Modal de éxito
-          if (_showSuccess)
-            _buildModal(
-              icon: Icons.check_circle,
-              color: Colors.green,
-              message: 'Reserva confirmada',
-            ),
-
-          // Modal de error
-          if (_showError)
-            _buildModal(
-              icon: Icons.cancel,
-              color: Colors.red,
-              message: _errorMessage,
+          // Indicador de carga centralizado
+          if (_isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: primaryBlue),
+                      SizedBox(height: 20),
+                      Text(
+                        'Procesando reserva...',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          color: darkGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -599,7 +580,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF00569D) : Colors.white,
+          color: isSelected ? primaryBlue : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [BoxShadow(color: cardShadow, blurRadius: 4)],
         ),
@@ -645,7 +626,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: service['iconColor'].withOpacity(0.2),
+                color: service['iconColor'].withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -683,7 +664,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                     style: TextStyle(
                       fontFamily: 'Roboto',
                       fontSize: 14,
-                      color: const Color(0xFF00569D),
+                      color: primaryBlue,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -749,46 +730,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         } else if (i == fullStars && hasHalf) {
           return const Icon(Icons.star_half_rounded, color: Colors.orange, size: 16);
         } else {
-          return Icon(Icons.star_border_rounded, color: Colors.orange.withOpacity(0.3), size: 16);
+          return Icon(Icons.star_border_rounded, color: Colors.orange.withValues(alpha: 0.3), size: 16);
         }
       }),
-    );
-  }
-
-  Widget _buildModal({required IconData icon, required Color color, required String message}) {
-    return Container(
-      color: Colors.black.withOpacity(0.5),
-      child: Center(
-        child: Container(
-          width: 220,
-          height: 220,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 70,
-                color: color,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                message,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: darkGray,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

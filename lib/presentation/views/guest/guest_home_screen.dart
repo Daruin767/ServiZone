@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/presentation/views/client/services/subcategory_screen.dart';
 
 class GuestHomeScreen extends StatefulWidget {
   const GuestHomeScreen({super.key});
@@ -11,14 +12,12 @@ class GuestHomeScreen extends StatefulWidget {
 }
 
 class _GuestHomeScreenState extends State<GuestHomeScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 1; // Por defecto en Servicios
   String searchQuery = "";
 
   late AnimationController _fadeController;
-  late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   // Mismas categorías que el cliente
   final List<Map<String, dynamic>> categories = [
@@ -26,7 +25,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "title": "Servi Favor",
       "subtitle": "Favores personales",
       "icon": Icons.handshake_rounded,
-      "color": const Color(0xFF00569D),
+      "color": primaryBlue,
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
     },
     {
@@ -73,25 +72,15 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
     _fadeController.forward();
-    _slideController.forward();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
-    _slideController.dispose();
     super.dispose();
   }
 
@@ -140,7 +129,13 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
+        boxShadow: [
+          BoxShadow(
+            color: cardShadow,
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -151,16 +146,34 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: const Color(0xFF00569D),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: "Actividad"),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_rounded),
+            label: "Actividad",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_rounded),
+            label: "Servicios",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_rounded),
+            label: "Reservas",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: "Cuenta",
+          ),
         ],
       ),
     );
@@ -171,7 +184,10 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     return Scaffold(
       backgroundColor: lightGray,
       appBar: AppBar(
-        title: const Text("Historial de Solicitudes", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Historial de Solicitudes",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
       ),
       body: FadeTransition(
@@ -183,14 +199,26 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               Container(
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), shape: BoxShape.circle),
-                child: Icon(Icons.history_rounded, size: 40, color: const Color(0xFF00569D)),
+                decoration: BoxDecoration(
+                  color: primaryBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.history_rounded, size: 40, color: primaryBlue),
               ),
               const SizedBox(height: 24),
-              const Text('No hay actividad reciente',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: darkGray)),
+              const Text(
+                'No hay actividad reciente',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: darkGray,
+                ),
+              ),
               const SizedBox(height: 12),
-              const Text('Inicia sesión para ver tu historial', style: TextStyle(color: mediumGray)),
+              const Text(
+                'Inicia sesión para ver tu historial',
+                style: TextStyle(color: mediumGray),
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
@@ -229,14 +257,20 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                       const SizedBox(height: 40),
                       RichText(
                         text: const TextSpan(
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                          ),
                           children: [
-                            TextSpan(text: "Servi", style: TextStyle(color: const Color(0xFF00569D))),
+                            TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
                             TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
                           ],
                         ),
                       ),
-                      const Text('Explora como invitado', style: TextStyle(color: mediumGray)),
+                      const Text(
+                        'Explora como invitado',
+                        style: TextStyle(color: mediumGray),
+                      ),
                     ],
                   ),
                 ),
@@ -246,11 +280,17 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               Container(
                 margin: const EdgeInsets.only(right: 16),
                 child: IconButton(
-                  icon: Stack(
+                  icon: const Stack(
                     children: [
                       Icon(Icons.notifications_none_rounded, color: darkGray),
-                      const Positioned(
-                          right: 0, top: 0, child: CircleAvatar(radius: 4, backgroundColor: Colors.red)),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: CircleAvatar(
+                          radius: 4,
+                          backgroundColor: Colors.red,
+                        ),
+                      ),
                     ],
                   ),
                   onPressed: _showLoginRequiredDialog, // Diálogo
@@ -272,30 +312,42 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: cardShadow, blurRadius: 8)],
+                        boxShadow: const [
+                          BoxShadow(color: cardShadow, blurRadius: 8),
+                        ],
                       ),
                       child: Row(
                         children: [
                           Container(
                             width: 40,
                             height: 40,
-                            decoration:
-                                BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                            child: Icon(Icons.add_location_alt_rounded, color: const Color(0xFF00569D)),
+                            decoration: BoxDecoration(
+                              color: primaryBlue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.add_location_alt_rounded, color: primaryBlue),
                           ),
                           const SizedBox(width: 16),
-                          Expanded(
+                          const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Agregar dirección',
-                                    style: TextStyle(fontWeight: FontWeight.w600, color: darkGray)),
-                                const SizedBox(height: 2),
-                                Text('Inicia sesión para agregar', style: TextStyle(color: mediumGray, fontSize: 12)),
+                                Text(
+                                  'Agregar dirección',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: darkGray,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Inicia sesión para agregar',
+                                  style: TextStyle(color: mediumGray, fontSize: 12),
+                                ),
                               ],
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
                         ],
                       ),
                     ),
@@ -308,13 +360,17 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                     onChanged: (v) => setState(() => searchQuery = v),
                     decoration: InputDecoration(
                       hintText: "¿Qué servicio necesitas?",
-                      prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
+                      prefixIcon: const Icon(Icons.search_rounded, color: mediumGray),
                       filled: true,
                       fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
                       focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: const Color(0xFF00569D), width: 2)),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: primaryBlue, width: 2),
+                      ),
                     ),
                   ),
                 ),
@@ -323,10 +379,19 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
-                      const Text('Categorías de Servicios',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
+                      const Text(
+                        'Categorías de Servicios',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: darkGray,
+                        ),
+                      ),
                       const Spacer(),
-                      Text('${filteredCategories.length} servicios', style: TextStyle(color: mediumGray)),
+                      Text(
+                        '${filteredCategories.length} servicios',
+                        style: const TextStyle(color: mediumGray),
+                      ),
                     ],
                   ),
                 ),
@@ -355,15 +420,32 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     );
   }
 
-  // Tarjeta de categoría con acción bloqueada
+  // Tarjeta de categoría con navegación permitida para invitados
   Widget _buildCategoryCard(Map<String, dynamic> category) {
     return GestureDetector(
-      onTap: _showLoginRequiredDialog, // Diálogo
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SubcategoryScreen(
+              categoryName: category["title"],
+              isGuest: true,
+            ),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: category["gradient"]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: category["color"].withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: (category["color"] as Color).withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -373,14 +455,22 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               Container(
                 width: 50,
                 height: 50,
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(category["icon"], color: Colors.white),
               ),
               const Spacer(),
-              Text(category["title"],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(
+                category["title"],
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
               const SizedBox(height: 4),
-              Text(category["subtitle"], style: TextStyle(color: Colors.white.withOpacity(0.8))),
+              Text(
+                category["subtitle"],
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+              ),
             ],
           ),
         ),
@@ -394,7 +484,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       backgroundColor: lightGray,
       appBar: AppBar(
         title: const Text("Mis Reservas"),
-        backgroundColor: const Color(0xFF00569D),
+        backgroundColor: primaryBlue,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -402,7 +492,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.calendar_month_rounded, size: 80, color: const Color(0xFF00569D).withOpacity(0.5)),
+            Icon(Icons.calendar_month_rounded, size: 80, color: primaryBlue.withValues(alpha: 0.5)),
             const SizedBox(height: 20),
             const Text(
               "No tienes reservas activas",
@@ -434,7 +524,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.person, size: 80, color: const Color(0xFF00569D)),
+            const Icon(Icons.person, size: 80, color: primaryBlue),
             const SizedBox(height: 20),
             const Text('Perfil de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),

@@ -46,7 +46,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
   final List<Map<String, dynamic>> statsItems = [
     {'title': 'Usuarios Activos', 'value': '2,847', 'change': '+12%', 'icon': Icons.group_rounded, 'color': const Color(0xFF4CAF50), 'trending': true},
     {'title': 'Tickets Abiertos', 'value': '23', 'change': '-8%', 'icon': Icons.support_rounded, 'color': const Color(0xFFFF9800), 'trending': false},
-    {'title': 'Tiempo de Respuesta', 'value': '2.3h', 'change': '-15%', 'icon': Icons.timer_rounded, 'color': const Color(0xFF2196F3), 'trending': false},
+    {'title': 'Tiempo de Respuesta', 'value': '2.3h', 'change': '-15%', 'icon': Icons.timer_rounded, 'color': primaryBlue, 'trending': false},
     {'title': 'Satisfacción', 'value': '98.5%', 'change': '+2%', 'icon': Icons.sentiment_very_satisfied_rounded, 'color': const Color(0xFF4CAF50), 'trending': true},
   ];
 
@@ -72,7 +72,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Copiado: $text'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating),
+      SnackBar(content: Text('Copiado: $text'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -80,7 +80,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
     switch (action) {
       case 'email': _copyToClipboard(value); break;
       case 'phone': case 'whatsapp': _copyToClipboard(value); break;
-      case 'chat': ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Abriendo chat en vivo...'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating)); break;
+      case 'chat': ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Abriendo chat en vivo...'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating)); break;
     }
   }
 
@@ -170,7 +170,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             HapticFeedback.lightImpact();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Abriendo: ${doc['title']}'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Abriendo: ${doc['title']}'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating));
           },
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -212,7 +212,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             HapticFeedback.lightImpact();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Iniciando: ${tool['title']}'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Iniciando: ${tool['title']}'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating));
           },
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -324,8 +324,8 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                   Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                    child: Icon(Icons.support_agent_rounded, color: const Color(0xFF00569D)),
+                    decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                    child: Icon(Icons.support_agent_rounded, color: primaryBlue),
                   ),
                   const SizedBox(width: 16),
                   const Text('Centro de Soporte', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),

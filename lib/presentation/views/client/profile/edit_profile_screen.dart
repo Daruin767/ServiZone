@@ -147,7 +147,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00569D),
+                        backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(70, 36),
                         shape: RoundedRectangleBorder(
@@ -249,66 +249,39 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El correo es requerido');
-                                  return '';
+                                  return 'El correo electrónico es obligatorio';
                                 }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                  _showErrorSnackBar('Correo inválido');
-                                  return '';
+                                if (!value.contains('@')) {
+                                  return 'Ingresa un correo electrónico válido';
                                 }
                                 return null;
                               },
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
 
-                          // Campo Número personal
-                          Text(
-                            'Número personal',
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: darkGray,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
+                          // Teléfono
                           Container(
-                            height: 50,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                             ),
                             child: TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                color: darkGray,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Ej: 3001234567',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 14,
-                                  color: mediumGray,
-                                ),
+                              decoration: const InputDecoration(
+                                hintText: 'Número de celular',
+                                prefixIcon: Icon(Icons.phone_rounded, color: mediumGray),
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  _showErrorSnackBar('El número es requerido');
-                                  return '';
+                                  return 'El número de celular es obligatorio';
                                 }
                                 if (value.length < 10) {
-                                  _showErrorSnackBar('El número debe tener al menos 10 dígitos');
-                                  return '';
+                                  return 'El celular debe tener al menos 10 dígitos';
                                 }
                                 return null;
                               },
@@ -324,7 +297,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _updateData,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00569D),
+                                backgroundColor: primaryBlue,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

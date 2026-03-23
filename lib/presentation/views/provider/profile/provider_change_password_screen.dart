@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
+import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart'; 
@@ -78,15 +80,15 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
 
   Future<void> _changePassword() async {
     if (_currentPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Ingresa tu contraseña actual');
+      _showErrorSnackBar('La contraseña actual es obligatoria');
       return;
     }
     if (_newPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Ingresa una nueva contraseña');
+      _showErrorSnackBar('La nueva contraseña es obligatoria');
       return;
     }
     if (_confirmPasswordController.text.isEmpty) {
-      _showErrorSnackBar('Confirma tu nueva contraseña');
+      _showErrorSnackBar('Debes confirmar la nueva contraseña');
       return;
     }
 
@@ -94,23 +96,23 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
     final confirmPwd = _confirmPasswordController.text;
 
     if (!_hasMinLength(newPwd)) {
-      _showErrorSnackBar('La contraseña debe tener al menos 8 caracteres');
+      _showErrorSnackBar('La nueva contraseña debe tener al menos 8 caracteres');
       return;
     }
     if (!_hasUppercase(newPwd)) {
-      _showErrorSnackBar('Debe contener al menos una letra mayúscula');
+      _showErrorSnackBar('La nueva contraseña debe incluir una mayúscula');
       return;
     }
     if (!_hasLowercase(newPwd)) {
-      _showErrorSnackBar('Debe contener al menos una letra minúscula');
+      _showErrorSnackBar('La nueva contraseña debe incluir una minúscula');
       return;
     }
     if (!_hasNumber(newPwd)) {
-      _showErrorSnackBar('Debe contener al menos un número');
+      _showErrorSnackBar('La nueva contraseña debe incluir un número');
       return;
     }
     if (!_hasSpecial(newPwd)) {
-      _showErrorSnackBar('Debe contener al menos un carácter especial (!@#\$%^&*)');
+      _showErrorSnackBar('La nueva contraseña debe incluir un carácter especial');
       return;
     }
     if (!_passwordsMatch(newPwd, confirmPwd)) {
@@ -200,7 +202,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00569D),
+                        backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(70, 36),
                         shape: RoundedRectangleBorder(
@@ -326,7 +328,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _changePassword,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00569D),
+                                backgroundColor: primaryBlue,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -455,6 +457,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
         currentIndex: _currentIndex,
         onTap: (index) async {
           HapticFeedback.lightImpact();
+          if (index == _currentIndex) return;
           switch (index) {
             case 0:
               Navigator.pushReplacement(
@@ -463,23 +466,28 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
               );
               break;
             case 1:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sección de servicios en desarrollo'), behavior: SnackBarBehavior.floating),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
               );
               break;
             case 2:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sección de reservas en desarrollo'), behavior: SnackBarBehavior.floating),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderBookingsScreen()),
               );
               break;
             case 3:
-              // Ya estamos en cuenta
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProviderProfileScreen(onLogout: _logout)),
+              );
               break;
           }
         },
         backgroundColor: Colors.white,
         elevation: 0,
-        selectedItemColor: const Color(0xFF1976D2),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),

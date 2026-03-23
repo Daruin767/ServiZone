@@ -19,7 +19,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
 
   final List<Map<String, dynamic>> reportCategories = [
     {'title': 'Reportes de Ventas', 'subtitle': 'Ingresos y transacciones', 'icon': Icons.trending_up_rounded, 'color': const Color(0xFF4CAF50), 'count': '156', 'change': '+12%', 'trending': true},
-    {'title': 'Reportes de Usuarios', 'subtitle': 'Análisis de usuarios activos', 'icon': Icons.group_rounded, 'color': const Color(0xFF2196F3), 'count': '2,847', 'change': '+8%', 'trending': true},
+    {'title': 'Reportes de Usuarios', 'subtitle': 'Análisis de usuarios activos', 'icon': Icons.group_rounded, 'color': primaryBlue, 'count': '2,847', 'change': '+8%', 'trending': true},
     {'title': 'Reportes de Proveedores', 'subtitle': 'Servicios y proveedores', 'icon': Icons.business_rounded, 'color': const Color(0xFFFF9800), 'count': '89', 'change': '-3%', 'trending': false},
     {'title': 'Reportes de Publicaciones', 'subtitle': 'Contenido y engagement', 'icon': Icons.article_rounded, 'color': const Color(0xFF9C27B0), 'count': '1,234', 'change': '+15%', 'trending': true},
     {'title': 'Reportes Financieros', 'subtitle': 'Estados financieros', 'icon': Icons.account_balance_rounded, 'color': const Color(0xFF00BCD4), 'count': '45', 'change': '+5%', 'trending': true},
@@ -28,7 +28,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
 
   final List<Map<String, dynamic>> quickStats = [
     {'title': 'Ingresos Totales', 'value': '\$125,847', 'icon': Icons.attach_money_rounded, 'color': const Color(0xFF4CAF50), 'percentage': '+23%', 'trending': true},
-    {'title': 'Servicios Activos', 'value': '1,456', 'icon': Icons.work_rounded, 'color': const Color(0xFF2196F3), 'percentage': '+12%', 'trending': true},
+    {'title': 'Servicios Activos', 'value': '1,456', 'icon': Icons.work_rounded, 'color': primaryBlue, 'percentage': '+12%', 'trending': true},
     {'title': 'Tiempo Promedio', 'value': '2.4h', 'icon': Icons.timer_rounded, 'color': const Color(0xFFFF9800), 'percentage': '-8%', 'trending': false},
     {'title': 'Satisfacción', 'value': '4.8/5', 'icon': Icons.star_rounded, 'color': const Color(0xFFE91E63), 'percentage': '+5%', 'trending': true},
   ];
@@ -66,7 +66,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             title: Text(p),
             value: p,
             groupValue: selectedPeriod,
-            activeColor: const Color(0xFF00569D),
+            activeColor: primaryBlue,
             onChanged: (v) {
               setState(() => selectedPeriod = v!);
               Navigator.pop(context);
@@ -83,7 +83,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Datos actualizados para: $selectedPeriod'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating),
+        SnackBar(content: Text('Datos actualizados para: $selectedPeriod'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating),
       );
     });
   }
@@ -99,8 +99,8 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-              child: Icon(Icons.summarize_rounded, color: const Color(0xFF00569D)),
+              decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              child: Icon(Icons.summarize_rounded, color: primaryBlue),
             ),
             const SizedBox(width: 12),
             Expanded(child: Text('Generar Reporte', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray))),
@@ -113,10 +113,10 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Generando reporte de $reportType...'), backgroundColor: const Color(0xFF00569D), behavior: SnackBarBehavior.floating),
+                SnackBar(content: Text('Generando reporte de $reportType...'), backgroundColor: primaryBlue, behavior: SnackBarBehavior.floating),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00569D)),
+            style: ElevatedButton.styleFrom(backgroundColor: primaryBlue),
             child: const Text('Generar'),
           ),
         ],
@@ -287,13 +287,13 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                           Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(color: const Color(0xFF00569D).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                            child: Icon(Icons.analytics_rounded, color: const Color(0xFF00569D)),
+                            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            child: Icon(Icons.analytics_rounded, color: primaryBlue),
                           ),
                           const SizedBox(width: 16),
                           const Text('Dashboard de Reportes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
                           const Spacer(),
-                          IconButton(onPressed: _refreshData, icon: Icon(Icons.refresh_rounded, color: const Color(0xFF00569D))),
+                          IconButton(onPressed: _refreshData, icon: Icon(Icons.refresh_rounded, color: primaryBlue)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -305,14 +305,14 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                               borderRadius: BorderRadius.circular(12),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00569D).withOpacity(0.3))),
+                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: primaryBlue.withOpacity(0.3))),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.calendar_today_rounded, color: const Color(0xFF00569D)),
+                                    Icon(Icons.calendar_today_rounded, color: primaryBlue),
                                     const SizedBox(width: 12),
                                     Text(selectedPeriod, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                                     const Spacer(),
-                                    Icon(Icons.arrow_drop_down_rounded, color: const Color(0xFF00569D)),
+                                    Icon(Icons.arrow_drop_down_rounded, color: primaryBlue),
                                   ],
                                 ),
                               ),
@@ -359,7 +359,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF00569D))),
+                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryBlue)),
                       const SizedBox(height: 16),
                       const Text('Actualizando datos...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
                     ],

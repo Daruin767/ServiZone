@@ -4,10 +4,17 @@ import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 import 'package:servizone_app/presentation/views/client/services/service_list_screen.dart';
 
+import 'package:servizone_app/core/routes/app_routes.dart';
+
 class SubcategoryScreen extends StatefulWidget {
   final String categoryName;
+  final bool isGuest;
 
-  const SubcategoryScreen({super.key, required this.categoryName});
+  const SubcategoryScreen({
+    super.key,
+    required this.categoryName,
+    this.isGuest = false,
+  });
 
   @override
   State<SubcategoryScreen> createState() => _SubcategoryScreenState();
@@ -43,7 +50,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
     'Cuidado Personal': [
       {'name': 'Peluquería', 'icon': Icons.content_cut, 'color': Colors.deepOrange},
       {'name': 'Manicura y pedicura', 'icon': Icons.face, 'color': Colors.pinkAccent},
-      {'name': 'Masajes', 'icon': Icons.spa, 'color': Colors.lightBlue},
+      {'name': 'Masajes', 'icon': Icons.spa, 'color': secondaryBlue},
     ],
     'Mascotas': [
       {'name': 'Paseo de perros', 'icon': Icons.pets, 'color': Colors.brown},
@@ -65,10 +72,43 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
   }
 
   void _navigateToHomeWithIndex(int index) {
+    if (widget.isGuest) {
+      // Si es invitado, no puede navegar a otras pestañas que requieran auth
+      if (index == 1) {
+        Navigator.pop(context);
+      } else {
+        _showLoginRequiredDialog();
+      }
+      return;
+    }
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => HomeClientScreen(initialIndex: index)),
       (route) => false,
+    );
+  }
+
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Acceso restringido'),
+        content: const Text('Para acceder a esta sección debes iniciar sesión o registrarte.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushNamed(context, AppRoutes.login);
+            },
+            child: const Text('Iniciar Sesión'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -84,7 +124,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF00569D),
+            color: primaryBlue,
           ),
         ),
         // Sin leading
@@ -161,6 +201,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                                   builder: (_) => ServiceListScreen(
                                     categoryName: widget.categoryName,
                                     subcategoryName: sub['name'],
+                                    isGuest: widget.isGuest,
                                   ),
                                 ),
                               );
@@ -229,7 +270,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: const Color(0xFF00569D),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),

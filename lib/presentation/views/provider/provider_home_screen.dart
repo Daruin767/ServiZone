@@ -5,6 +5,7 @@ import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
+import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
 
 class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
@@ -41,29 +42,206 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
     }
   }
 
-  final List<Map<String, dynamic>> services = List.generate(3, (index) => {
-        'name': 'Servicio de ejemplo 1',
-        'price': 45000,
-        'status': 'Activo',
-      });
-
-  final List<Map<String, dynamic>> bookings = [
+  final List<Map<String, dynamic>> services = [
     {
-      'client': 'Ana garcia',
+      'name': 'Servicio de ejemplo 1',
+      'price': 45000,
+      'status': 'Activo',
+    },
+    {
+      'name': 'Servicio de ejemplo 1',
+      'price': 45000,
+      'status': 'Inactivo',
+    },
+    {
+      'name': 'Servicio de ejemplo 1',
+      'price': 45000,
+      'status': 'Activo',
+    },
+  ];
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showInfoSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: primaryBlue,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showCreateServiceDialog() {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+    String? selectedCategory;
+    String? selectedSubcategory;
+    String? selectedType;
+    bool isActive = true;
+
+    const categoriesList = ['Hogar', 'Ciclismo', 'Cuidado Personal', 'Mascotas', 'Otros'];
+    const subcategoriesMap = {
+      'Hogar': ['Plomería', 'Electricidad', 'Limpieza', 'Jardinería'],
+      'Ciclismo': ['Mantenimiento', 'Reparación', 'Venta de Accesorios'],
+      'Cuidado Personal': ['Barbería', 'Manicura', 'Maquillaje'],
+      'Mascotas': ['Paseo', 'Entrenamiento', 'Baño'],
+      'Otros': ['Varios'],
+    };
+    const typesList = ['Mantenimiento', 'Instalación', 'Reparación', 'Consultoría', 'Otros'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Crear Nuevo Servicio', style: Theme.of(context).textTheme.displayMedium),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Nombre del servicio', prefixIcon: Icon(Icons.build_rounded)),
+                    validator: (v) => v == null || v.isEmpty ? 'El nombre es obligatorio' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(labelText: 'Descripción', prefixIcon: Icon(Icons.description_rounded)),
+                    maxLines: 3,
+                    validator: (v) => v == null || v.isEmpty ? 'La descripción es obligatoria' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'Categoría', prefixIcon: Icon(Icons.category_rounded)),
+                    items: categoriesList.map((c) => DropdownMenuItem<String>(value: c, child: Text(c))).toList(),
+                    onChanged: (v) => setModalState(() {
+                      selectedCategory = v;
+                      selectedSubcategory = null;
+                    }),
+                    validator: (v) => v == null ? 'Selecciona una categoría' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'Subcategoría', prefixIcon: Icon(Icons.list_rounded)),
+                    items: (subcategoriesMap[selectedCategory] ?? <String>[])
+                        .map((s) => DropdownMenuItem<String>(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setModalState(() => selectedSubcategory = v),
+                    validator: (v) => v == null ? 'Selecciona una subcategoría' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'Tipo de servicio', prefixIcon: Icon(Icons.merge_type_rounded)),
+                    items: typesList.map((t) => DropdownMenuItem<String>(value: t, child: Text(t))).toList(),
+                    onChanged: (v) => setModalState(() => selectedType = v),
+                    validator: (v) => v == null ? 'Selecciona un tipo' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Estado del servicio (Activo)'),
+                    value: isActive,
+                    onChanged: (v) => setModalState(() => isActive = v),
+                    activeThumbColor: primaryBlue,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          setState(() {
+                            services.add({
+                              'name': nameController.text,
+                              'price': 0, // Precio por defecto o añadir campo
+                              'status': isActive ? 'Activo' : 'Inactivo',
+                            });
+                          });
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Servicio creado correctamente'),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Crear Servicio'),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  final List<Map<String, dynamic>> bookings = const [
+    {
+      'client': 'Ana García',
       'date': '15 marzo 2026',
       'time': '10:30',
       'status': 'Confirmada',
     },
     {
-      'client': 'Ana garcia',
-      'date': '15 marzo 2026',
+      'client': 'Carlos Ruiz',
+      'date': '16 marzo 2026',
       'time': '11:00',
       'status': 'Pendiente',
     },
     {
-      'client': 'Ana garcia',
-      'date': '15 marzo 2026',
-      'time': '10:30',
+      'client': 'María López',
+      'date': '17 marzo 2026',
+      'time': '14:45',
       'status': 'Cancelada',
     },
   ];
@@ -83,12 +261,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               child: Text(
                 'Bienvenido, @$_userName!',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+                style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
             Padding(
@@ -152,31 +325,27 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
                   const SizedBox(height: 24),
 
                   // Botón Crear nuevo servicio
-                  Center(
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                        },
-                        icon: const Icon(Icons.add, color: Colors.white),
-                        label: const Text(
-                          'Crear nuevo servicio',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: _showCreateServiceDialog,
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      label: const Text(
+                        'Crear Nuevo Servicio',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0D47A1),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 2,
                       ),
                     ),
                   ),
@@ -242,7 +411,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
             value,
             style: const TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 18,
+              fontSize: 16, // Reducir un poco para evitar desbordamiento
               fontWeight: FontWeight.w600,
               color: Colors.black,
             ),
@@ -252,7 +421,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
             label,
             style: const TextStyle(
               fontFamily: 'Roboto',
-              fontSize: 10,
+              fontSize: 9, // Reducir un poco
               color: mediumGray,
             ),
             textAlign: TextAlign.center,
@@ -273,11 +442,9 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
         fontFamily: 'Poppins',
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
       ),
     );
   }
@@ -345,9 +512,9 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               color: const Color(0xFF4CAF50),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
-              'Activo',
-              style: TextStyle(
+            child: Text(
+              service['status'],
+              style: const TextStyle(
                 fontFamily: 'Roboto',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -362,30 +529,20 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
 
   Widget _buildBookingCard(Map<String, dynamic> booking) {
     Color statusColor;
-    Color statusTextColor;
-    Color circleColor;
-    String statusText = booking['status'];
+    String statusText = booking['status'] ?? 'Pendiente';
 
     switch (statusText) {
       case 'Confirmada':
-        statusColor = const Color(0xFF64B5F6);
-        statusTextColor = const Color(0xFF0D47A1);
-        circleColor = const Color(0xFFDCE775);
+        statusColor = Colors.blue;
         break;
       case 'Pendiente':
-        statusColor = const Color(0xFFFFF176);
-        statusTextColor = const Color(0xFFF57F17);
-        circleColor = const Color(0xFFDCE775);
+        statusColor = Colors.orange;
         break;
       case 'Cancelada':
-        statusColor = const Color(0xFFE57373);
-        statusTextColor = Colors.white;
-        circleColor = const Color(0xFFDCE775);
+        statusColor = Colors.red;
         break;
       default:
         statusColor = Colors.grey;
-        statusTextColor = Colors.white;
-        circleColor = Colors.grey;
     }
 
     return Container(
@@ -408,9 +565,10 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: circleColor,
+              color: statusColor.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
+            child: Icon(Icons.calendar_today_rounded, size: 20, color: statusColor),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -419,38 +577,32 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               children: [
                 Text(
                   'Cliente: ${booking['client']}',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    fontFamily: 'Roboto',
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${booking['date']} - ${booking['time']}',
-                  style: const TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 12,
-                    color: mediumGray,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               statusText,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Roboto',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: statusTextColor,
+                color: Colors.white,
               ),
             ),
           ),
@@ -472,34 +624,25 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: 0,
         onTap: (index) async {
           HapticFeedback.lightImpact();
-          setState(() {
-            _currentIndex = index;
-          });
+          if (index == 0) return;
           switch (index) {
-            case 0:
-              // Ya estamos en inicio
-              break;
             case 1:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
-            );
-            break;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
+              );
+              break;
             case 2:
-              // Reservas (placeholder)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sección de reservas en desarrollo'),
-                  behavior: SnackBarBehavior.floating,
-                ),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderBookingsScreen()),
               );
               break;
             case 3:
-              // Cuenta: navegar a ProviderProfileScreen
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProviderProfileScreen(
@@ -512,35 +655,16 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
         },
         backgroundColor: Colors.white,
         elevation: 0,
-        selectedItemColor: const Color(0xFF1976D2),
+        selectedItemColor: primaryBlue,
         unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12,
-        ),
+        selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_rounded),
-            label: 'Servicios',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_rounded),
-            label: 'Reservas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Cuenta',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
         ],
       ),
     );
