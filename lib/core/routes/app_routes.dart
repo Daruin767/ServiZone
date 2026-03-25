@@ -11,6 +11,9 @@ import 'package:servizone_app/presentation/views/auth/forgot_password_screen.dar
 import 'package:servizone_app/presentation/views/provider/provider_request_screen.dart';
 import 'package:servizone_app/presentation/views/admin/category_management_screen.dart';
 
+import 'package:servizone_app/presentation/views/provider/provider_requests_view.dart';
+import 'package:servizone_app/presentation/views/admin/providers/provider_requests_screen.dart';
+
 class AppRoutes {
   static const String splash = '/';
   static const String login = '/auth/login';
@@ -19,6 +22,8 @@ class AppRoutes {
   static const String providerHome = '/provider/home';
   static const String guestHome = '/guest/home';
   static const String adminDashboard = '/admin/dashboard';
+  static const String adminProviderRequests = '/admin/provider-requests';
+  static const String providerRequests = '/provider/requests';
   static const String reservas = '/reservas';
   static const String account = '/account';
   static const String providerProfile = '/provider/profile';
@@ -49,6 +54,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const GuestHomeScreen());
       case adminDashboard:
         return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+      case adminProviderRequests:
+        return MaterialPageRoute(builder: (_) => const ProviderRequestsScreen());
+      case providerRequests:
+        return MaterialPageRoute(builder: (_) => const ProviderRequestsView());
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
       case providerRequest:
@@ -70,3 +79,5 @@ class AppRoutes {
     }
   }
 }
+
+

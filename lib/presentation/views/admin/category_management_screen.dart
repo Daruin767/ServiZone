@@ -480,7 +480,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -493,7 +493,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Icon(cat['icon'], color: Colors.white, size: 24),
@@ -550,3 +550,5 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     );
   }
 }
+
+

@@ -147,7 +147,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
+        unselectedItemColor: textGray,
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 12,
@@ -217,7 +217,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
               const SizedBox(height: 12),
               const Text(
                 'Inicia sesión para ver tu historial',
-                style: TextStyle(color: mediumGray),
+                style: TextStyle(color: textGray),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -269,7 +269,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                       ),
                       const Text(
                         'Explora como invitado',
-                        style: TextStyle(color: mediumGray),
+                        style: TextStyle(color: textGray),
                       ),
                     ],
                   ),
@@ -342,12 +342,12 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                                 SizedBox(height: 2),
                                 Text(
                                   'Inicia sesión para agregar',
-                                  style: TextStyle(color: mediumGray, fontSize: 12),
+                                  style: TextStyle(color: textGray, fontSize: 12),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
                         ],
                       ),
                     ),
@@ -360,7 +360,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                     onChanged: (v) => setState(() => searchQuery = v),
                     decoration: InputDecoration(
                       hintText: "¿Qué servicio necesitas?",
-                      prefixIcon: const Icon(Icons.search_rounded, color: mediumGray),
+                      prefixIcon: const Icon(Icons.search_rounded, color: textGray),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -390,7 +390,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                       const Spacer(),
                       Text(
                         '${filteredCategories.length} servicios',
-                        style: const TextStyle(color: mediumGray),
+                        style: const TextStyle(color: textGray),
                       ),
                     ],
                   ),
@@ -501,7 +501,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
             const SizedBox(height: 10),
             const Text(
               "Inicia sesión para gestionar tus reservas",
-              style: TextStyle(color: mediumGray),
+              style: TextStyle(color: textGray),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
@@ -528,7 +528,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
             const SizedBox(height: 20),
             const Text('Perfil de Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            const Text('Inicia sesión para ver tu perfil', style: TextStyle(color: mediumGray)),
+            const Text('Inicia sesión para ver tu perfil', style: TextStyle(color: textGray)),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
@@ -542,3 +542,5 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     );
   }
 }
+
+

@@ -7,10 +7,10 @@ import 'package:servizone_app/presentation/views/provider/provider_home_screen.d
 import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_edit_profile_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_change_password_screen.dart';
-import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/client/home_client_screen.dart';
 
 import 'package:servizone_app/presentation/views/common/booking_history_screen.dart';
+import 'package:servizone_app/presentation/widgets/shared/provider_bottom_nav.dart';
 
 class ProviderProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -46,14 +46,6 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     if (parts.isEmpty) return 'U';
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
-  }
-
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
-    }
   }
 
   void _showChangeRoleConfirmation() {
@@ -98,28 +90,27 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightGray,
+      backgroundColor: backgroundGray,
       appBar: AppBar(
-        backgroundColor: configBlue,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'Configuraciones',
+          'Perfil',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            color: textGray,
           ),
         ),
-        automaticallyImplyLeading: false, // Sin flecha de retroceso
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar y nombre
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -140,23 +131,33 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: primaryBlue,
+                      color: successGreen,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: primaryBlue.withValues(alpha: 0.3),
+                          color: successGreen.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Center(
-                      child: Text(
-                        _getInitials(_userName),
-                        style: const TextStyle(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: const BoxDecoration(
                           color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(_userName),
+                            style: const TextStyle(
+                              color: successGreen,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -167,7 +168,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: darkGray,
+                      color: textGray,
                     ),
                   ),
                 ],
@@ -179,8 +180,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             // Información personal
             _buildSectionTitle('Información personal'),
             _buildOptionTile(
-              icon: Icons.edit_rounded,
-              title: 'Editar información personal',
+              icon: Icons.person_rounded,
+              title: 'Información personal',
               color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -276,104 +277,88 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // Botón destacado: Cambiar a cliente
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [primaryBlue, secondaryBlue],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryBlue.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: _showChangeRoleConfirmation,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          'Cambiar a cliente',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            _buildActionButton(
+              title: 'Cambiar a cliente',
+              color: primaryBlue,
+              onTap: _showChangeRoleConfirmation,
             ),
 
-            // Botón de cerrar sesión
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.heavyImpact();
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: const Text('Cerrar sesión'),
-                      content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancelar'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            widget.onLogout();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Cerrar sesión'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text(
-                  'Cerrar Sesión',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
+            const SizedBox(height: 16),
+
+            _buildActionButton(
+              title: 'Cerrar sesión',
+              color: errorRed,
+              onTap: () {
+                HapticFeedback.heavyImpact();
+                _showLogoutDialog();
+              },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(), // Barra inferior funcional
+      bottomNavigationBar: const ProviderBottomNav(currentIndex: 4),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onLogout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: errorRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 
@@ -456,14 +441,14 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                           subtitle,
                           style: TextStyle(
                             fontSize: 14,
-                            color: mediumGray,
+                            color: textGray,
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
               ],
             ),
           ),
@@ -472,83 +457,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          HapticFeedback.lightImpact();
-          if (index == _currentIndex) return; // evitar navegar a la misma pantalla
-          switch (index) {
-            case 0: // Inicio
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const ProviderHomeScreen(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-              break;
-            case 1: // Servicios
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const ProviderServicesScreen(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-              break;
-            case 2: // Reservas
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const ProviderBookingsScreen(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-              break;
-            case 3: // Cuenta (ya estamos)
-              // No hacer nada
-              break;
-          }
-        },
-        backgroundColor: Colors.white,
-        elevation: 0,
-        selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 12,
-        ),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
-        ],
-      ),
-    );
-  }
+  // Deleted extra private widgets
+
 }
+
+

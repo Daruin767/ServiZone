@@ -5,6 +5,7 @@ import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'users/users_management_screen.dart';
 import 'providers/providers_management_screen.dart';
+import 'providers/provider_requests_screen.dart';
 
 import 'reports/reports_dashboard_screen.dart';
 import 'support/support_center_screen.dart';
@@ -34,6 +35,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   final List<_MenuItem> _items = const [
     _MenuItem('Gestión Usuarios', Icons.group_rounded, Color(0xFF2E7D32)),
+    _MenuItem('Solicitudes Proveedores', Icons.person_add_rounded, purple),
     _MenuItem('Gestión Proveedores', Icons.business_rounded, Color(0xFFE65100)),
     _MenuItem('Reportes', Icons.analytics_rounded, Color(0xFFC2185B)),
     _MenuItem('Gestión Servicios', Icons.category_rounded, primaryBlue),
@@ -43,6 +45,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   late final List<Widget> _screens = [
     const UsersManagementScreen(),
+    const ProviderRequestsScreen(),
     const ProvidersManagementScreen(),
     const ReportsDashboardScreen(),
     const CategoryManagementScreen(),
@@ -173,12 +176,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   Container(
                     width: 80,
                     height: 80,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [primaryBlue, secondaryBlue]),
+                    decoration: const BoxDecoration(
+                      color: purple,
                       shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: primaryBlue.withValues(alpha: 0.3), blurRadius: 15)],
                     ),
-                    child: const Icon(Icons.admin_panel_settings_rounded, size: 40, color: Colors.white),
+                    child: Center(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.admin_panel_settings_rounded, size: 40, color: purple),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(_displayName,
@@ -268,17 +280,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: errorRed.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    border: Border.all(color: errorRed.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                      const Icon(Icons.logout_rounded, color: errorRed, size: 20),
                       if (!isCollapsed) ...[
                         const SizedBox(width: 12),
-                        const Text('Cerrar Sesión', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                        const Text('Cerrar Sesión', style: TextStyle(color: errorRed, fontWeight: FontWeight.w600)),
                       ],
                     ],
                   ),
@@ -375,3 +387,5 @@ class _MenuItem {
   final Color color;
   const _MenuItem(this.label, this.icon, this.color);
 }
+
+

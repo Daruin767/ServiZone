@@ -70,7 +70,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 12),
             Text(
               'Ingresa tu correo electrónico y te enviaremos instrucciones para crear una nueva.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: mediumGray),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: textGray),
             ),
             const SizedBox(height: 40),
             TextField(
@@ -98,3 +98,5 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 }
+
+

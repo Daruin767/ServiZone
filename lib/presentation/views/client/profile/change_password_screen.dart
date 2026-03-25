@@ -250,7 +250,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 2),
                         ),
@@ -441,7 +441,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: mediumGray,
+              color: textGray,
               size: 20,
             ),
             onPressed: onToggle,
@@ -450,7 +450,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           hintStyle: TextStyle(
             fontFamily: 'Roboto',
             fontSize: 14,
-            color: mediumGray,
+            color: textGray,
           ),
         ),
       ),
@@ -459,7 +459,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Widget _buildModal({required IconData icon, required Color color, required String message}) {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withValues(alpha: 0.5),
       child: Center(
         child: Container(
           width: 220,
@@ -494,3 +494,5 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 }
+
+

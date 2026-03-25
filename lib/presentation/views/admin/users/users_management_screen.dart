@@ -214,10 +214,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: secondaryBlue.withValues(alpha: 0.1),
+                                color: primaryDarkBlue.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.person_rounded, color: secondaryBlue, size: 24),
+                              child: const Icon(Icons.person_rounded, color: primaryDarkBlue, size: 24),
                             ),
                             const SizedBox(width: 16),
                             const Text('Editar Usuario', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray)),
@@ -370,7 +370,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                               height: 50,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [primaryBlue, secondaryBlue],
+                                  colors: [primaryBlue, primaryDarkBlue],
                                 ),
                                 shape: BoxShape.circle,
                                 boxShadow: [
@@ -398,7 +398,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                                 children: [
                                   Text(user.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
                                   const SizedBox(height: 4),
-                                  Text('ID: ${user.id}', style: TextStyle(fontSize: 12, color: mediumGray)),
+                                  Text('ID: ${user.id}', style: TextStyle(fontSize: 12, color: textGray)),
                                 ],
                               ),
                             ),
@@ -411,28 +411,28 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                                 const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_rounded), SizedBox(width: 8), Text('Editar')])),
                                 const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_rounded, color: Colors.red), SizedBox(width: 8), Text('Eliminar', style: TextStyle(color: Colors.red))])),
                               ],
-                              child: Container(padding: const EdgeInsets.all(8), child: Icon(Icons.more_vert_rounded, color: mediumGray)),
+                              child: Container(padding: const EdgeInsets.all(8), child: Icon(Icons.more_vert_rounded, color: textGray)),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Icon(Icons.phone_rounded, size: 16, color: mediumGray),
+                            Icon(Icons.phone_rounded, size: 16, color: textGray),
                             const SizedBox(width: 8),
-                            Text(user.phone, style: const TextStyle(fontSize: 14, color: mediumGray)),
+                            Text(user.phone, style: const TextStyle(fontSize: 14, color: textGray)),
                             const SizedBox(width: 20),
-                            Icon(Icons.cake_rounded, size: 16, color: mediumGray),
+                            Icon(Icons.cake_rounded, size: 16, color: textGray),
                             const SizedBox(width: 8),
-                            Text('${user.age} años', style: const TextStyle(fontSize: 14, color: mediumGray)),
+                            Text('${user.age} años', style: const TextStyle(fontSize: 14, color: textGray)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.location_on_rounded, size: 16, color: mediumGray),
+                            Icon(Icons.location_on_rounded, size: 16, color: textGray),
                             const SizedBox(width: 8),
-                            Expanded(child: Text(user.address, style: const TextStyle(fontSize: 14, color: mediumGray), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            Expanded(child: Text(user.address, style: const TextStyle(fontSize: 14, color: textGray), maxLines: 1, overflow: TextOverflow.ellipsis)),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -466,7 +466,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? color : mediumGray,
+        color: isActive ? color : textGray,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -500,7 +500,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                           Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                             child: Icon(Icons.group_rounded, color: primaryBlue),
                           ),
                           const SizedBox(width: 16),
@@ -519,9 +519,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                         onChanged: _filterUsers,
                         decoration: InputDecoration(
                           hintText: 'Buscar por nombre, teléfono o dirección...',
-                          prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
+                          prefixIcon: Icon(Icons.search_rounded, color: textGray),
                           suffixIcon: searchQuery.isNotEmpty
-                              ? IconButton(icon: Icon(Icons.clear_rounded, color: mediumGray), onPressed: () { _searchController.clear(); _filterUsers(''); })
+                              ? IconButton(icon: Icon(Icons.clear_rounded, color: textGray), onPressed: () { _searchController.clear(); _filterUsers(''); })
                               : null,
                           filled: true,
                           fillColor: lightGray,
@@ -544,13 +544,13 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
                               Container(
                                 width: 80,
                                 height: 80,
-                                decoration: BoxDecoration(color: mediumGray.withValues(alpha: 0.1), shape: BoxShape.circle),
-                                child: Icon(searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.group_rounded, size: 40, color: mediumGray),
+                                decoration: BoxDecoration(color: textGray.withValues(alpha: 0.1), shape: BoxShape.circle),
+                                child: Icon(searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.group_rounded, size: 40, color: textGray),
                               ),
                               const SizedBox(height: 20),
                               Text(
                                 searchQuery.isNotEmpty ? 'No se encontraron usuarios' : 'No hay usuarios registrados',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: mediumGray),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textGray),
                               ),
                             ],
                           ),
@@ -574,3 +574,5 @@ class _UsersManagementScreenState extends State<UsersManagementScreen>
     );
   }
 }
+
+

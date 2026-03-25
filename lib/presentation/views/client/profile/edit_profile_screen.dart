@@ -46,20 +46,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontFamily: 'Roboto', fontSize: 14),
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
+
 
   Future<void> _updateData() async {
     // Validar con el form (los validadores ya mostrarán SnackBar)
@@ -180,7 +167,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 2),
                         ),
@@ -242,7 +229,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 hintStyle: TextStyle(
                                   fontFamily: 'Roboto',
                                   fontSize: 14,
-                                  color: mediumGray,
+                                  color: textGray,
                                 ),
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -266,14 +253,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2))],
                             ),
                             child: TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 hintText: 'Número de celular',
-                                prefixIcon: Icon(Icons.phone_rounded, color: mediumGray),
+                                prefixIcon: Icon(Icons.phone_rounded, color: textGray),
                                 border: InputBorder.none,
                               ),
                               validator: (value) {
@@ -369,7 +356,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildModal({required IconData icon, required Color color, required String message}) {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withValues(alpha: 0.5),
       child: Center(
         child: Container(
           width: 220,
@@ -404,3 +391,5 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
+
+

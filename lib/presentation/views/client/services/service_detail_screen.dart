@@ -145,7 +145,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
               const SizedBox(height: 4),
               Text(
                 widget.service['professional'],
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: mediumGray),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: textGray),
               ),
               const SizedBox(height: 8),
               _buildRatingRow(),
@@ -217,7 +217,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
               ),
               TextSpan(
                 text: '(15) Reseñas',
-                style: const TextStyle(color: mediumGray, fontSize: 14),
+                style: const TextStyle(color: textGray, fontSize: 14),
               ),
             ],
           ),
@@ -294,7 +294,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
                 const Divider(height: 24),
                 const Text(
                   'Política: Cancelación gratuita hasta 24h antes.',
-                  style: TextStyle(fontSize: 12, color: mediumGray),
+                  style: TextStyle(fontSize: 12, color: textGray),
                 ),
                 const SizedBox(height: 20),
                 if (_bookingState == BookingState.error)
@@ -317,7 +317,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: mediumGray, fontSize: 14)),
+          Text(label, style: const TextStyle(color: textGray, fontSize: 14)),
           Text(
             value,
             style: TextStyle(
@@ -432,7 +432,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: Theme.of(context).textTheme.titleLarge),
-              if (subtitle != null) Text(subtitle, style: const TextStyle(color: mediumGray, fontSize: 14)),
+              if (subtitle != null) Text(subtitle, style: const TextStyle(color: textGray, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 16),
@@ -448,8 +448,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> with SingleTi
       children: [
         Text(review['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         const SizedBox(height: 4),
-        Text(review['comment']!, style: const TextStyle(color: mediumGray, fontSize: 14)),
+        Text(review['comment']!, style: const TextStyle(color: textGray, fontSize: 14)),
       ],
     );
   }
 }
+
+

@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
-import 'package:servizone_app/core/themes/theme_provider.dart';
-import 'package:servizone_app/main.dart'; // To access global themeProvider
 import 'package:servizone_app/presentation/views/client/profile/edit_profile_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/change_password_screen.dart';
 
@@ -49,18 +47,18 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightGray,
+      backgroundColor: backgroundGray,
       appBar: AppBar(
-        backgroundColor: configBlue,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'Configuraciones',
+          'Perfil',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            color: textGray,
           ),
         ),
       ),
@@ -100,12 +98,22 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                       ],
                     ),
                     child: Center(
-                      child: Text(
-                        _getInitials(_userName),
-                        style: const TextStyle(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: const BoxDecoration(
                           color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(_userName),
+                            style: const TextStyle(
+                              color: primaryBlue,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -116,7 +124,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: darkGray,
+                      color: textGray,
                     ),
                   ),
                 ],
@@ -158,21 +166,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             const SizedBox(height: 24),
 
             _buildSectionTitle('Preferencias'),
-            ListenableBuilder(
-              listenable: themeProvider,
-              builder: (context, _) {
-                return _buildSwitchTile(
-                  icon: Icons.dark_mode_rounded,
-                  title: 'Modo oscuro',
-                  subtitle: 'Alterne la apariencia de la aplicación',
-                  value: themeProvider.isDarkMode,
-                  onChanged: (v) {
-                    HapticFeedback.mediumImpact();
-                    themeProvider.toggleTheme(v);
-                  },
-                );
-              },
-            ),
             _buildOptionTile(
               icon: Icons.history_rounded,
               title: 'Historial de reservas',
@@ -195,7 +188,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               icon: Icons.email_rounded,
               title: 'Correo de Soporte',
               subtitle: 'soporte@servizone.com',
-              color: Colors.green,
+              color: successGreen,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Clipboard.setData(const ClipboardData(text: 'soporte@servizone.com'));
@@ -227,7 +220,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               icon: Icons.chat_rounded,
               title: 'WhatsApp',
               subtitle: '+57 300 123 4567',
-              color: Colors.green,
+              color: successGreen,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Clipboard.setData(const ClipboardData(text: '+57 300 123 4567'));
@@ -242,55 +235,88 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
 
             const SizedBox(height: 40),
 
-            _buildOptionTile(
-              icon: Icons.business_center_rounded,
-              title: 'Ser Proveedor',
-              subtitle: 'Ofrece tus servicios en la plataforma',
+            _buildActionButton(
+              title: 'Cambiar a proveedor',
               color: primaryBlue,
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.pushNamed(context, AppRoutes.providerRequest);
               },
             ),
-            _buildOptionTile(
-              icon: Icons.logout_rounded,
+
+            const SizedBox(height: 16),
+
+            _buildActionButton(
               title: 'Cerrar sesión',
-              subtitle: 'Salir de tu cuenta de forma segura',
-              color: Colors.red,
+              color: errorRed,
               onTap: () {
                 HapticFeedback.heavyImpact();
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    title: const Text('Cerrar sesión'),
-                    content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancelar'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          widget.onLogout();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Cerrar sesión'),
-                      ),
-                    ],
-                  ),
-                );
+                _showLogoutDialog();
               },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onLogout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: errorRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -310,7 +336,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: darkGray,
+              color: textGray,
             ),
           ),
         ],
@@ -366,23 +392,23 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: darkGray,
+                          color: textGray,
                         ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 4),
                         Text(
                           subtitle,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: mediumGray,
+                            color: textGray,
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                const Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
               ],
             ),
           ),
@@ -390,72 +416,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       ),
     );
   }
-
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: cardShadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: primaryBlue, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: darkGray,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: mediumGray,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch.adaptive(
-              value: value,
-              onChanged: onChanged,
-              activeColor: primaryBlue,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
+
+

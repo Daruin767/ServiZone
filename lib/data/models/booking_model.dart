@@ -4,7 +4,8 @@ enum BookingStatus {
   pendiente,
   confirmada,
   completada,
-  cancelada
+  cancelada,
+  rechazada,
 }
 
 class BookingModel {
@@ -13,6 +14,7 @@ class BookingModel {
   final String providerId;
   final String clientName;
   final String? providerName;
+  final String serviceType;
   final String serviceName;
   final DateTime date;
   final String address;
@@ -27,6 +29,7 @@ class BookingModel {
     required this.clientId,
     required this.providerId,
     required this.clientName,
+    required this.serviceType,
     required this.serviceName,
     required this.date,
     required this.address,
@@ -44,6 +47,7 @@ class BookingModel {
     String? providerId,
     String? clientName,
     String? providerName,
+    String? serviceType,
     String? serviceName,
     DateTime? date,
     String? address,
@@ -59,6 +63,7 @@ class BookingModel {
       providerId: providerId ?? this.providerId,
       clientName: clientName ?? this.clientName,
       providerName: providerName ?? this.providerName,
+      serviceType: serviceType ?? this.serviceType,
       serviceName: serviceName ?? this.serviceName,
       date: date ?? this.date,
       address: address ?? this.address,
@@ -70,3 +75,5 @@ class BookingModel {
     );
   }
 }
+
+

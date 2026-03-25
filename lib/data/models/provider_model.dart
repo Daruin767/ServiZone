@@ -25,3 +25,5 @@ class ProviderModel {
     DateTime? joinDate,
   }) : joinDate = joinDate ?? DateTime.now();
 }
+
+

@@ -105,7 +105,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
               decoration: BoxDecoration(
                 color: isSelected ? cat['color'] : Colors.white,
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: isSelected ? cat['color'].withOpacity(0.3) : cardShadow, blurRadius: 10)],
+                boxShadow: [BoxShadow(color: isSelected ? cat['color'].withValues(alpha: 0.3) : cardShadow, blurRadius: 10)],
               ),
               child: Row(
                 children: [
@@ -137,7 +137,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: BoxDecoration(color: contact['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: contact['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                   child: Icon(contact['icon'], color: contact['color']),
                 ),
                 const SizedBox(width: 16),
@@ -147,11 +147,11 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                     children: [
                       Text(contact['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: darkGray)),
                       const SizedBox(height: 4),
-                      Text(contact['subtitle'], style: const TextStyle(fontSize: 14, color: mediumGray)),
+                      Text(contact['subtitle'], style: const TextStyle(fontSize: 14, color: textGray)),
                     ],
                   ),
                 ),
-                Icon(Icons.content_copy_rounded, color: mediumGray),
+                Icon(Icons.content_copy_rounded, color: textGray),
               ],
             ),
           ),
@@ -179,7 +179,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: BoxDecoration(color: doc['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: doc['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                   child: Icon(doc['icon'], color: doc['color']),
                 ),
                 const SizedBox(width: 16),
@@ -189,11 +189,11 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                     children: [
                       Text(doc['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: darkGray)),
                       const SizedBox(height: 4),
-                      Text(doc['subtitle'], style: const TextStyle(fontSize: 14, color: mediumGray)),
+                      Text(doc['subtitle'], style: const TextStyle(fontSize: 14, color: textGray)),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
               ],
             ),
           ),
@@ -221,7 +221,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: BoxDecoration(color: tool['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: tool['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                   child: Icon(tool['icon'], color: tool['color']),
                 ),
                 const SizedBox(width: 16),
@@ -231,13 +231,13 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                     children: [
                       Text(tool['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: darkGray)),
                       const SizedBox(height: 4),
-                      Text(tool['subtitle'], style: const TextStyle(fontSize: 14, color: mediumGray)),
+                      Text(tool['subtitle'], style: const TextStyle(fontSize: 14, color: textGray)),
                     ],
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: tool['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: tool['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                   child: Text('ABRIR', style: TextStyle(color: tool['color'], fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -270,12 +270,12 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                     Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(color: stat['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: stat['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                       child: Icon(stat['icon'], color: stat['color']),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: stat['trending'] ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: stat['trending'] ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                       child: Row(
                         children: [
                           Icon(stat['trending'] ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 14, color: stat['trending'] ? Colors.green : Colors.red),
@@ -289,7 +289,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                 const Spacer(),
                 Text(stat['value'], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkGray)),
                 const SizedBox(height: 4),
-                Text(stat['title'], style: const TextStyle(fontSize: 14, color: mediumGray)),
+                Text(stat['title'], style: const TextStyle(fontSize: 14, color: textGray)),
               ],
             ),
           );
@@ -324,7 +324,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                   Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                     child: Icon(Icons.support_agent_rounded, color: primaryBlue),
                   ),
                   const SizedBox(width: 16),
@@ -332,7 +332,7 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                     child: Row(
                       children: const [
                         CircleAvatar(radius: 4, backgroundColor: Colors.green),
@@ -354,3 +354,5 @@ class _SupportCenterScreenState extends State<SupportCenterScreen>
     );
   }
 }
+
+

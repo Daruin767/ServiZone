@@ -212,7 +212,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   (label.contains('Contraseña') && !label.contains('Confirmar'))
                       ? (_obscure1 ? Icons.visibility_off : Icons.visibility)
                       : (_obscure2 ? Icons.visibility_off : Icons.visibility),
-                  color: mediumGray,
+                  color: textGray,
                 ),
                 onPressed: () {
                   if (label.contains('Contraseña') && !label.contains('Confirmar')) {
@@ -233,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       duration: const Duration(milliseconds: 300),
       child: _showLoadingScreen
           ? Container(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(32),
@@ -255,7 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       duration: const Duration(milliseconds: 300),
       child: _showSuccessScreen
           ? Container(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(32),
@@ -287,7 +287,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       duration: const Duration(milliseconds: 300),
       child: _showErrorScreen
           ? Container(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 32),
@@ -339,7 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -363,7 +363,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 'Regístrate para comenzar',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: mediumGray,
+                                  color: textGray,
                                 ),
                               ),
                               const SizedBox(height: 32),
@@ -488,7 +488,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   text: TextSpan(
                                     text: '¿Ya tienes cuenta? ',
                                     style: TextStyle(
-                                      color: mediumGray,
+                                      color: textGray,
                                       fontSize: 15,
                                     ),
                                     children: [
@@ -512,7 +512,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: mediumGray,
+                                  color: textGray,
                                   height: 1.4,
                                 ),
                               ),
@@ -534,3 +534,5 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 }
+
+

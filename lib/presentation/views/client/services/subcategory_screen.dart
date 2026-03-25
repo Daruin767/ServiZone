@@ -50,7 +50,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
     'Cuidado Personal': [
       {'name': 'Peluquería', 'icon': Icons.content_cut, 'color': Colors.deepOrange},
       {'name': 'Manicura y pedicura', 'icon': Icons.face, 'color': Colors.pinkAccent},
-      {'name': 'Masajes', 'icon': Icons.spa, 'color': secondaryBlue},
+      {'name': 'Masajes', 'icon': Icons.spa, 'color': primaryDarkBlue},
     ],
     'Mascotas': [
       {'name': 'Paseo de perros', 'icon': Icons.pets, 'color': Colors.brown},
@@ -145,11 +145,11 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                 onChanged: (v) => setState(() => _searchQuery = v),
                 decoration: InputDecoration(
                   hintText: 'Buscar subcategoría...',
-                  hintStyle: TextStyle(color: mediumGray),
-                  prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
+                  hintStyle: TextStyle(color: textGray),
+                  prefixIcon: Icon(Icons.search_rounded, color: textGray),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear_rounded, color: mediumGray),
+                          icon: Icon(Icons.clear_rounded, color: textGray),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -168,11 +168,11 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off_rounded, size: 60, color: mediumGray),
+                        Icon(Icons.search_off_rounded, size: 60, color: textGray),
                         const SizedBox(height: 16),
                         Text(
                           'No se encontraron subcategorías',
-                          style: TextStyle(color: mediumGray, fontSize: 16),
+                          style: TextStyle(color: textGray, fontSize: 16),
                         ),
                       ],
                     ),
@@ -214,7 +214,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
-                                      color: sub['color'].withOpacity(0.1),
+                                      color: sub['color'].withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(sub['icon'], color: sub['color'], size: 28),
@@ -230,7 +230,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                                       ),
                                     ),
                                   ),
-                                  Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                                  Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
                                 ],
                               ),
                             ),
@@ -271,7 +271,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
+        unselectedItemColor: textGray,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
@@ -284,3 +284,5 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
     );
   }
 }
+
+

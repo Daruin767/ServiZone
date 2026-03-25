@@ -99,14 +99,14 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
               child: Icon(Icons.summarize_rounded, color: primaryBlue),
             ),
             const SizedBox(width: 12),
             Expanded(child: Text('Generar Reporte', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray))),
           ],
         ),
-        content: Text('¿Deseas generar el reporte de $reportType para el período: $selectedPeriod?', style: const TextStyle(color: mediumGray)),
+        content: Text('¿Deseas generar el reporte de $reportType para el período: $selectedPeriod?', style: const TextStyle(color: textGray)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           ElevatedButton(
@@ -160,12 +160,12 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                         Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(color: stat['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                          decoration: BoxDecoration(color: stat['color'].withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                           child: Icon(stat['icon'], color: stat['color']),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: stat['trending'] ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(color: stat['trending'] ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                           child: Row(
                             children: [
                               Icon(stat['trending'] ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 12, color: stat['trending'] ? Colors.green : Colors.red),
@@ -179,7 +179,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                     const Spacer(),
                     Text(stat['value'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
                     const SizedBox(height: 4),
-                    Text(stat['title'], style: const TextStyle(fontSize: 12, color: mediumGray)),
+                    Text(stat['title'], style: const TextStyle(fontSize: 12, color: textGray)),
                   ],
                 ),
               ),
@@ -219,9 +219,9 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: [report['color'], report['color'].withOpacity(0.7)]),
+                            gradient: LinearGradient(colors: [report['color'], report['color'].withValues(alpha: 0.7)]),
                             borderRadius: BorderRadius.circular(16),
-                            boxShadow: [BoxShadow(color: report['color'].withOpacity(0.3), blurRadius: 10)],
+                            boxShadow: [BoxShadow(color: report['color'].withValues(alpha: 0.3), blurRadius: 10)],
                           ),
                           child: Icon(report['icon'], color: Colors.white),
                         ),
@@ -232,7 +232,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                             children: [
                               Text(report['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: darkGray)),
                               const SizedBox(height: 4),
-                              Text(report['subtitle'], style: const TextStyle(fontSize: 14, color: mediumGray)),
+                              Text(report['subtitle'], style: const TextStyle(fontSize: 14, color: textGray)),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
@@ -240,7 +240,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                                   const SizedBox(width: 12),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: report['trending'] ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                    decoration: BoxDecoration(color: report['trending'] ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                                     child: Row(
                                       children: [
                                         Icon(report['trending'] ? Icons.trending_up_rounded : Icons.trending_down_rounded, size: 14, color: report['trending'] ? Colors.green : Colors.red),
@@ -254,7 +254,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                             ],
                           ),
                         ),
-                        Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+                        Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
                       ],
                     ),
                   ),
@@ -287,7 +287,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                           Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                             child: Icon(Icons.analytics_rounded, color: primaryBlue),
                           ),
                           const SizedBox(width: 16),
@@ -305,7 +305,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                               borderRadius: BorderRadius.circular(12),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: primaryBlue.withOpacity(0.3))),
+                                decoration: BoxDecoration(color: lightGray, borderRadius: BorderRadius.circular(12), border: Border.all(color: primaryBlue.withValues(alpha: 0.3))),
                                 child: Row(
                                   children: [
                                     Icon(Icons.calendar_today_rounded, color: primaryBlue),
@@ -351,7 +351,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
           ),
           if (isLoading)
             Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(32),
@@ -372,3 +372,5 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
     );
   }
 }
+
+

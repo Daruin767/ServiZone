@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
-import 'package:servizone_app/core/themes/theme_provider.dart';
-import 'package:servizone_app/main.dart'; // For global themeProvider
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -20,11 +18,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
   bool emailNotifications = true;
   bool pushNotifications = false;
   bool soundEnabled = true;
-  bool darkModeEnabled = false;
   bool autoBackup = true;
   bool twoFactorEnabled = false;
   String selectedLanguage = 'Español';
-  String selectedTheme = 'Claro';
 
   @override
   void initState() {
@@ -62,7 +58,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: Icon(Icons.lock_reset_rounded, color: primaryBlue),
               ),
               const SizedBox(width: 12),
@@ -184,30 +180,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
     );
   }
 
-  void _showThemeSelector() {
-    final themes = ['Claro', 'Oscuro', 'Automático'];
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Seleccionar Tema', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: themes.map((theme) => RadioListTile<String>(
-            title: Text(theme),
-            value: theme,
-            groupValue: selectedTheme,
-            activeColor: primaryBlue,
-            onChanged: (v) {
-              setState(() => selectedTheme = v!);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tema cambiado a $v'), backgroundColor: primaryBlue));
-            },
-          )).toList(),
-        ),
-      ),
-    );
-  }
 
   Widget _buildSectionHeader(String title, IconData icon) {
     return Container(
@@ -217,7 +189,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
           Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: primaryBlue, size: 18),
           ),
           const SizedBox(width: 12),
@@ -250,7 +222,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                   child: Icon(icon, color: iconColor),
                 ),
                 const SizedBox(width: 16),
@@ -259,7 +231,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: darkGray)),
-                      if (subtitle.isNotEmpty) ...[const SizedBox(height: 4), Text(subtitle, style: const TextStyle(fontSize: 14, color: mediumGray))],
+                      if (subtitle.isNotEmpty) ...[const SizedBox(height: 4), Text(subtitle, style: const TextStyle(fontSize: 14, color: textGray))],
                     ],
                   ),
                 ),
@@ -306,8 +278,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (actionText != null) ...[Text(actionText, style: const TextStyle(fontSize: 14, color: mediumGray)), const SizedBox(width: 8)],
-          Icon(Icons.arrow_forward_ios_rounded, color: mediumGray, size: 16),
+          if (actionText != null) ...[Text(actionText, style: const TextStyle(fontSize: 14, color: textGray)), const SizedBox(width: 8)],
+          Icon(Icons.arrow_forward_ios_rounded, color: textGray, size: 16),
         ],
       ),
     );
@@ -331,7 +303,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(color: primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                       child: Icon(Icons.settings_rounded, color: primaryBlue),
                     ),
                     const SizedBox(width: 16),
@@ -346,23 +318,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
               _buildSectionHeader('Seguridad', Icons.security_rounded),
               _buildActionCard(title: 'Cambiar Contraseña', subtitle: 'Actualiza tu contraseña', icon: Icons.lock_reset_rounded, iconColor: const Color(0xFFE91E63), onTap: _showChangePasswordDialog),
               _buildSwitchCard(title: 'Autenticación de Dos Factores', subtitle: 'Seguridad adicional', icon: Icons.security_rounded, iconColor: const Color(0xFF673AB7), value: twoFactorEnabled, onChanged: (v) => setState(() => twoFactorEnabled = v)),
-              _buildSectionHeader('Apariencia', Icons.palette_rounded),
+              _buildSectionHeader('Preferencias', Icons.palette_rounded),
               _buildActionCard(title: 'Idioma', subtitle: 'Cambia el idioma', icon: Icons.language_rounded, iconColor: const Color(0xFF00BCD4), onTap: _showLanguageSelector, actionText: selectedLanguage),
-              ListenableBuilder(
-                listenable: themeProvider,
-                builder: (context, _) {
-                  return _buildSwitchCard(
-                    title: 'Modo oscuro',
-                    subtitle: 'Activar tema oscuro en toda la aplicación',
-                    icon: Icons.dark_mode_rounded,
-                    iconColor: primaryBlue,
-                    value: themeProvider.isDarkMode,
-                    onChanged: (v) {
-                      themeProvider.toggleTheme(v);
-                    },
-                  );
-                },
-              ),
               _buildSectionHeader('Sistema', Icons.storage_rounded),
               _buildSwitchCard(title: 'Respaldo Automático', subtitle: 'Copia de seguridad automática', icon: Icons.backup_rounded, iconColor: const Color(0xFF4CAF50), value: autoBackup, onChanged: (v) => setState(() => autoBackup = v)),
               _buildSwitchCard(title: 'Sonidos del Sistema', subtitle: 'Reproducir sonidos', icon: Icons.volume_up_rounded, iconColor: const Color(0xFFFF5722), value: soundEnabled, onChanged: (v) => setState(() => soundEnabled = v)),
@@ -386,12 +343,12 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [const Text('Versión:', style: TextStyle(color: mediumGray)), const Text('1.2.3', style: TextStyle(fontWeight: FontWeight.w600, color: darkGray))],
+                      children: [const Text('Versión:', style: TextStyle(color: textGray)), const Text('1.2.3', style: TextStyle(fontWeight: FontWeight.w600, color: darkGray))],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [const Text('Última actualización:', style: TextStyle(color: mediumGray)), const Text('15 Ene 2025', style: TextStyle(fontWeight: FontWeight.w600, color: darkGray))],
+                      children: [const Text('Última actualización:', style: TextStyle(color: textGray)), const Text('15 Ene 2025', style: TextStyle(fontWeight: FontWeight.w600, color: darkGray))],
                     ),
                   ],
                 ),
@@ -404,3 +361,5 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen>
     );
   }
 }
+
+

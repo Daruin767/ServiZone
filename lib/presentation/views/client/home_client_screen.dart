@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/data/models/booking_model.dart';
 import 'package:servizone_app/presentation/views/client/services/subcategory_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
+import 'package:servizone_app/presentation/views/client/client_requests_screen.dart';
 import 'package:servizone_app/presentation/views/client/client_bookings_screen.dart';
 
 class HomeClientScreen extends StatefulWidget {
@@ -108,42 +110,69 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     }
   }
 
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Filtrar Categorías', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textGray)),
+            const SizedBox(height: 20),
+            _buildFilterOption('Todas', true, () {}),
+            _buildFilterOption('Hogar', false, () {}),
+            _buildFilterOption('Mascotas', false, () {}),
+            _buildFilterOption('Belleza', false, () {}),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(backgroundColor: primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                child: const Text('Aplicar', style: TextStyle(color: Colors.white, fontFamily: 'Poppins')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterOption(String label, bool isSelected, VoidCallback onTap) {
+    return ListTile(
+      title: Text(label, style: TextStyle(color: isSelected ? primaryBlue : textGray, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      trailing: isSelected ? const Icon(Icons.check_rounded, color: primaryBlue) : null,
+      onTap: () {
+        onTap();
+        Navigator.pop(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      _buildReservasScreen(),
-      _buildSolicitudScreen(),
-      _buildAccountScreen(),
+      _buildServiciosScreen(), // 0: Servicios
+      _buildSolicitudesTab(),  // 1: Solicitudes
+      _buildReservasScreen(),  // 2: Reservas
+      _buildAccountScreen(),   // 3: Cuenta
     ];
 
     return Scaffold(
-      backgroundColor: lightGray,
-      appBar: _currentIndex == 1 ? null : AppBar(
-        title: Text(
-          _currentIndex == 0 ? "Mis Reservas" : "Mi Perfil",
-          style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: darkGray,
-        elevation: 0,
-        actions: _currentIndex == 0 ? [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.filter_list_rounded),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Usa los filtros rápidos en la parte superior de la lista'),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                  ),
-                );
-              },
-            ),
-          ),
-        ] : null,
-      ),
+      backgroundColor: backgroundGray,
+      appBar: (_currentIndex == 3) 
+        ? AppBar(
+            title: const Text("Perfil", style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            foregroundColor: textGray,
+            elevation: 0,
+          ) 
+        : null,
       body: screens[_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
@@ -166,16 +195,17 @@ class _HomeClientScreenState extends State<HomeClientScreen>
           _fadeController.forward();
           _slideController.forward();
         },
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
+        unselectedItemColor: textGray,
         selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: "Reservas"),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: "Solicitudes"),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "Reservas"),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
         ],
       ),
@@ -221,8 +251,19 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
+  // Pantalla Solicitudes (usa ClientRequestsScreen)
+  Widget _buildSolicitudesTab() {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: const ClientRequestsScreen(),
+      ),
+    );
+  }
+
   // Pantalla Servicios (categorías)
-  Widget _buildSolicitudScreen() {
+  Widget _buildServiciosScreen() {
     final filteredCategories = categories.where((category) {
       final titleMatch = category["title"].toLowerCase().contains(searchQuery.toLowerCase());
       final subtitleMatch = category["subtitle"].toLowerCase().contains(searchQuery.toLowerCase());
@@ -239,20 +280,29 @@ class _HomeClientScreenState extends State<HomeClientScreen>
             // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.displayLarge,
-                      children: [
-                        const TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
-                        TextSpan(text: "Zone", style: TextStyle(color: darkGray.withOpacity(0.8))),
-                      ],
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.displayLarge,
+                          children: [
+                            const TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
+                            TextSpan(text: "Zone", style: TextStyle(color: darkGray.withValues(alpha: 0.8))),
+                          ],
+                        ),
+                      ),
+                      Text('Tu plataforma de servicios', 
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'Roboto')),
+                    ],
                   ),
-                  Text('Tu plataforma de servicios', 
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'Roboto')),
+                  IconButton(
+                    icon: const Icon(Icons.more_vert_rounded),
+                    onPressed: _showFilterSheet,
+                  ),
                 ],
               ),
             ),
@@ -311,7 +361,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -319,7 +369,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: mediumGray),
+          const Icon(Icons.search_rounded, color: textGray),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -331,13 +381,13 @@ class _HomeClientScreenState extends State<HomeClientScreen>
               decoration: const InputDecoration(
                 hintText: 'Buscar servicios...',
                 border: InputBorder.none,
-                hintStyle: TextStyle(color: mediumGray),
+                hintStyle: TextStyle(color: textGray),
               ),
             ),
           ),
           if (searchQuery.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.close_rounded, size: 20, color: mediumGray),
+              icon: const Icon(Icons.close_rounded, size: 20, color: textGray),
               onPressed: () => setState(() => searchQuery = ""),
             ),
         ],
@@ -350,10 +400,10 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_rounded, size: 80, color: mediumGray.withOpacity(0.3)),
+          Icon(Icons.search_off_rounded, size: 80, color: textGray.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           const Text('No se encontraron resultados', style: TextStyle(fontWeight: FontWeight.bold, color: darkGray)),
-          const Text('Intenta con otra palabra clave', style: TextStyle(color: mediumGray)),
+          const Text('Intenta con otra palabra clave', style: TextStyle(color: textGray)),
         ],
       ),
     );
@@ -376,7 +426,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: category["gradient"]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: category["color"].withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+          boxShadow: [BoxShadow(color: category["color"].withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -386,7 +436,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
               Container(
                 width: 50,
                 height: 50,
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                 child: Icon(category["icon"], color: Colors.white),
               ),
               const Spacer(),
@@ -395,7 +445,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
               const SizedBox(height: 4),
               Text(category["subtitle"], 
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontFamily: 'Roboto',
                   )),
             ],
@@ -405,7 +455,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 
-  // Pantalla Reservas
+  // Pantalla Reservas (solo confirmadas/completadas)
   Widget _buildReservasScreen() {
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -427,3 +477,5 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     );
   }
 }
+
+

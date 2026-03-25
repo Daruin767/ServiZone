@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/data/models/booking_model.dart';
+import 'package:servizone_app/presentation/widgets/shared/status_badge.dart';
+import 'package:servizone_app/presentation/widgets/shared/booking_detail_sheet.dart';
 
 class ClientBookingsScreen extends StatefulWidget {
   const ClientBookingsScreen({super.key});
@@ -12,17 +14,23 @@ class ClientBookingsScreen extends StatefulWidget {
 }
 
 class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
-  int _monthsFilter = 1;
-  BookingStatus? _statusFilter;
+  String _priceSort = 'none'; // 'asc', 'desc', 'none'
+  String _dateSort = 'desc'; // 'asc', 'desc'
+  final List<String> _selectedServiceTypes = [];
+
+  List<String> get _availableServiceTypes {
+    return _allBookings.map((e) => e.serviceType).toSet().toList();
+  }
   
-  // Datos de ejemplo para las reservas
+  // Datos de ejemplo para las reservas (excluyendo pendientes)
   final List<BookingModel> _allBookings = [
     BookingModel(
       id: '1',
       clientId: 'C1',
       providerId: 'P1',
       clientName: 'Juan Pérez',
-      serviceName: 'Plomería - Fuga de agua',
+      serviceType: 'Plomería',
+      serviceName: 'Fuga de agua',
       date: DateTime.now().subtract(const Duration(days: 2)),
       address: 'Calle 123 # 45-67',
       price: 45000,
@@ -30,22 +38,11 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
       providerName: 'Carlos Electrics',
     ),
     BookingModel(
-      id: '2',
-      clientId: 'C1',
-      providerId: 'P2',
-      clientName: 'Juan Pérez',
-      serviceName: 'Electricidad - Cortocircuito',
-      date: DateTime.now().subtract(const Duration(days: 5)),
-      address: 'Calle 123 # 45-67',
-      price: 60000,
-      status: BookingStatus.pendiente,
-      providerName: 'Electricistas Ya',
-    ),
-    BookingModel(
       id: '3',
       clientId: 'C1',
       providerId: 'P3',
       clientName: 'Juan Pérez',
+      serviceType: 'Limpieza',
       serviceName: 'Limpieza de Hogar',
       date: DateTime.now().subtract(const Duration(days: 15)),
       address: 'Calle 123 # 45-67',
@@ -55,29 +52,26 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
       review: 'Excelente servicio, muy puntual.',
       providerName: 'Limpieza Pro',
     ),
-    BookingModel(
-      id: '4',
-      clientId: 'C1',
-      providerId: 'P4',
-      clientName: 'Juan Pérez',
-      serviceName: 'Cuidado de Mascotas',
-      date: DateTime.now().subtract(const Duration(days: 45)),
-      address: 'Calle 123 # 45-67',
-      price: 35000,
-      status: BookingStatus.cancelada,
-    ),
   ];
 
   List<BookingModel> get _filteredBookings {
-    final now = DateTime.now();
-    final filterDate = now.subtract(Duration(days: _monthsFilter * 30));
+    var list = _allBookings.where((booking) {
+      bool typeMatch = _selectedServiceTypes.isEmpty || _selectedServiceTypes.contains(booking.serviceType);
+      
+      return typeMatch;
+    }).toList();
+
+    if (_priceSort == 'asc') {
+      list.sort((a, b) => a.price.compareTo(b.price));
+    } else if (_priceSort == 'desc') {
+      list.sort((a, b) => b.price.compareTo(a.price));
+    } else if (_dateSort == 'asc') {
+      list.sort((a, b) => a.date.compareTo(b.date));
+    } else {
+      list.sort((a, b) => b.date.compareTo(a.date));
+    }
     
-    return _allBookings.where((booking) {
-      final dateMatch = booking.date.isAfter(filterDate);
-      final statusMatch = _statusFilter == null || booking.status == _statusFilter;
-      return dateMatch && statusMatch;
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    return list;
   }
 
   void _showNotification(String message, {bool isError = false}) {
@@ -131,7 +125,7 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
           children: [
             const Text('¿Estás seguro de que deseas cancelar esta reserva?', style: TextStyle(color: darkGray)),
             const SizedBox(height: 16),
-            const Text('Motivo de cancelación', style: TextStyle(fontSize: 12, color: mediumGray)),
+            const Text('Motivo de cancelación', style: TextStyle(fontSize: 12, color: textGray)),
             const SizedBox(height: 8),
             TextField(
               controller: reasonController,
@@ -274,58 +268,106 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        _buildQuickFilters(),
-        Expanded(
-          child: _filteredBookings.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: _filteredBookings.length,
-                  itemBuilder: (context, index) => _buildBookingCard(_filteredBookings[index]),
+    return Scaffold(
+      backgroundColor: backgroundGray,
+      appBar: AppBar(
+        title: const Text('Mis Reservas', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: textGray,
+        elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              setState(() {
+                if (value == 'price_asc') {
+                  _priceSort = 'asc';
+                  _dateSort = 'none';
+                } else if (value == 'price_desc') {
+                  _priceSort = 'desc';
+                  _dateSort = 'none';
+                } else if (value == 'date_asc') {
+                  _dateSort = 'asc';
+                  _priceSort = 'none';
+                } else if (value == 'date_desc') {
+                  _dateSort = 'desc';
+                  _priceSort = 'none';
+                } else if (value.startsWith('type_')) {
+                  final type = value.substring(5);
+                  if (_selectedServiceTypes.contains(type)) {
+                    _selectedServiceTypes.remove(type);
+                  } else {
+                    _selectedServiceTypes.add(type);
+                  }
+                }
+              });
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                enabled: false,
+                child: Text('Filtrar por tipo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              ..._availableServiceTypes.map((type) => PopupMenuItem(
+                value: 'type_$type',
+                child: Row(
+                  children: [
+                    Icon(
+                      _selectedServiceTypes.contains(type) ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                      color: primaryBlue,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(type),
+                  ],
                 ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickFilters() {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _buildFilterChip('1 mes', _monthsFilter == 1, () => setState(() => _monthsFilter = 1)),
-          _buildFilterChip('3 meses', _monthsFilter == 3, () => setState(() => _monthsFilter = 3)),
-          _buildFilterChip('6 meses', _monthsFilter == 6, () => setState(() => _monthsFilter = 6)),
-          const VerticalDivider(width: 20, indent: 10, endIndent: 10),
-          _buildStatusChipShort('Todas', _statusFilter == null, () => setState(() => _statusFilter = null)),
-          _buildStatusChipShort('Pendientes', _statusFilter == BookingStatus.pendiente, () => setState(() => _statusFilter = BookingStatus.pendiente)),
-          _buildStatusChipShort('Confirmadas', _statusFilter == BookingStatus.confirmada, () => setState(() => _statusFilter = BookingStatus.confirmada)),
+              )),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                enabled: false,
+                child: Text('Ordenar por', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              PopupMenuItem(
+                value: 'date_desc',
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today_rounded, color: _dateSort == 'desc' ? primaryBlue : textGray, size: 20),
+                    const SizedBox(width: 12),
+                    const Text('Fecha: más reciente'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'price_asc',
+                child: Row(
+                  children: [
+                    Icon(Icons.arrow_upward_rounded, color: _priceSort == 'asc' ? primaryBlue : textGray, size: 20),
+                    const SizedBox(width: 12),
+                    const Text('Precio: menor a mayor'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'price_desc',
+                child: Row(
+                  children: [
+                    Icon(Icons.arrow_downward_rounded, color: _priceSort == 'desc' ? primaryBlue : textGray, size: 20),
+                    const SizedBox(width: 12),
+                    const Text('Precio: mayor a menor'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatusChipShort(String label, bool isSelected, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onTap(),
-        selectedColor: primaryBlue.withValues(alpha: 0.1),
-        labelStyle: TextStyle(
-          color: isSelected ? primaryBlue : mediumGray,
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: BorderSide(color: isSelected ? primaryBlue : Colors.transparent),
-      ),
+      body: _filteredBookings.isEmpty
+          ? _buildEmptyState()
+          : ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: _filteredBookings.length,
+              itemBuilder: (context, index) => _buildBookingCard(_filteredBookings[index]),
+            ),
     );
   }
 
@@ -334,238 +376,17 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 24),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: const Text(
-                    'Detalles de la Reserva',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: darkGray,
-                    ),
-                  ),
-                ),
-                _buildStatusBadge(booking.status),
-              ],
-            ),
-            const SizedBox(height: 24),
-            
-            _buildDetailItem('ID de Reserva', '#${booking.id}'),
-            _buildDetailItem('Servicio', booking.serviceName),
-            
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _buildDetailItem(
-                    'Fecha y Hora', 
-                    DateFormat('EEEE, dd MMMM yyyy - hh:mm a', 'es_ES').format(booking.date),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Precio Total',
-                      style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 12,
-                        color: mediumGray,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '\$${NumberFormat('#,###').format(booking.price)}',
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: primaryBlue,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            
-            _buildDetailItem('Dirección', booking.address),
-            
-            const Divider(height: 32),
-            const Text(
-              'Participantes',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: darkGray,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _buildDetailItem('Cliente', booking.clientName)),
-                Expanded(child: _buildDetailItem('Proveedor', booking.providerName ?? 'No asignado')),
-              ],
-            ),
-            
-            if (booking.status == BookingStatus.cancelada && booking.cancellationReason != null)
-              _buildDetailItem(
-                'Motivo de Cancelación', 
-                booking.cancellationReason!, 
-                textColor: errorRed,
-              ),
-              
-            if (booking.rating != null) ...[
-              const Divider(height: 32),
-              const Text(
-                'Reseña y Calificación',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: darkGray,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  ...List.generate(5, (index) => Icon(
-                    index < (booking.rating ?? 0).floor() ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: Colors.amber,
-                    size: 24,
-                  )),
-                  const SizedBox(width: 12),
-                  Text(
-                    '(${booking.rating})',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ],
-              ),
-              if (booking.review != null && booking.review!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '"${booking.review}"',
-                  style: const TextStyle(
-                    fontFamily: 'Roboto',
-                    fontStyle: FontStyle.italic,
-                    color: mediumGray,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ],
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(BookingStatus status) {
-    Color color;
-    color = switch (status) {
-      BookingStatus.pendiente => warningOrange,
-      BookingStatus.confirmada => primaryBlue,
-      BookingStatus.completada => successGreen,
-      BookingStatus.cancelada => errorRed,
-    };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status.name.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(String label, String value, {Color? textColor}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: 12,
-              color: mediumGray,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: textColor ?? darkGray,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onTap(),
-        selectedColor: primaryBlue.withValues(alpha: 0.1),
-        checkmarkColor: primaryBlue,
-        labelStyle: TextStyle(
-          color: isSelected ? primaryBlue : mediumGray,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 12,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: BorderSide(color: isSelected ? primaryBlue : Colors.transparent),
-      ),
+      builder: (context) => BookingDetailSheet(booking: booking),
     );
   }
 
   Widget _buildBookingCard(BookingModel booking) {
-    Color statusColor;
-    statusColor = switch (booking.status) {
+    Color statusColor = switch (booking.status) {
       BookingStatus.pendiente => warningOrange,
-      BookingStatus.confirmada => primaryBlue,
+      BookingStatus.confirmada => successGreen,
       BookingStatus.completada => successGreen,
       BookingStatus.cancelada => errorRed,
+      BookingStatus.rechazada => errorRed,
     };
 
     return GestureDetector(
@@ -618,22 +439,22 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            _buildStatusBadge(booking.status),
+                            StatusBadge(status: booking.status),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Proveedor: ${booking.providerName ?? 'No asignado'}',
-                          style: const TextStyle(color: mediumGray, fontSize: 13),
+                          style: const TextStyle(color: textGray, fontSize: 13),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded, size: 14, color: mediumGray),
+                            const Icon(Icons.calendar_today_rounded, size: 14, color: textGray),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('dd MMM yyyy - hh:mm a').format(booking.date),
-                              style: const TextStyle(color: mediumGray, fontSize: 12),
+                              style: const TextStyle(color: textGray, fontSize: 12),
                             ),
                           ],
                         ),
@@ -660,7 +481,7 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
                   ),
                   Row(
                     children: [
-                      if (booking.status == BookingStatus.pendiente || booking.status == BookingStatus.confirmada)
+                      if (booking.status == BookingStatus.confirmada)
                         TextButton(
                           onPressed: () => _showCancelDialog(booking),
                           child: const Text('Cancelar', style: TextStyle(color: errorRed, fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
@@ -699,9 +520,11 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
           Icon(Icons.calendar_month_rounded, size: 80, color: primaryBlue.withValues(alpha: 0.1)),
           const SizedBox(height: 16),
           const Text('No hay reservas registradas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkGray)),
-          const Text('Tus próximas reservas aparecerán aquí', style: TextStyle(color: mediumGray)),
+          const Text('Tus próximas reservas aparecerán aquí', style: TextStyle(color: textGray)),
         ],
       ),
     );
   }
 }
+
+

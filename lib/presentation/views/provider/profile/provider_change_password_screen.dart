@@ -235,7 +235,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 2),
                         ),
@@ -361,9 +361,6 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
                 ),
               ),
 
-              // Barra de navegación inferior
-              _buildBottomNavBar(),
-
               // Barra de gestos iOS
               Container(
                 height: 20,
@@ -425,7 +422,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: mediumGray,
+              color: textGray,
               size: 20,
             ),
             onPressed: onToggle,
@@ -434,77 +431,18 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
           hintStyle: TextStyle(
             fontFamily: 'Roboto',
             fontSize: 14,
-            color: mediumGray,
+            color: textGray,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) async {
-          HapticFeedback.lightImpact();
-          if (index == _currentIndex) return;
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const ProviderHomeScreen()),
-              );
-              break;
-            case 1:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const ProviderServicesScreen()),
-              );
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const ProviderBookingsScreen()),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ProviderProfileScreen(onLogout: _logout)),
-              );
-              break;
-          }
-        },
-        backgroundColor: Colors.white,
-        elevation: 0,
-        selectedItemColor: primaryBlue,
-        unselectedItemColor: mediumGray,
-        selectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 12),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildModal({required IconData icon, required Color color, required String message}) {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withValues(alpha: 0.5),
       child: Center(
         child: Container(
           width: 220,
@@ -535,3 +473,5 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
     );
   }
 }
+
+

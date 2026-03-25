@@ -147,7 +147,7 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                     height: 60,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [primaryBlue, secondaryBlue],
+                        colors: [primaryBlue, primaryDarkBlue],
                       ),
                       shape: BoxShape.circle,
                     ),
@@ -232,7 +232,7 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: mediumGray, fontWeight: FontWeight.w600)),
+              Text(label, style: const TextStyle(fontSize: 12, color: textGray, fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(value, style: const TextStyle(fontSize: 14, color: darkGray, fontWeight: FontWeight.w500)),
             ],
@@ -363,7 +363,7 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                               height: 50,
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [primaryBlue, secondaryBlue],
+                                  colors: [primaryBlue, primaryDarkBlue],
                                 ),
                                 shape: BoxShape.circle,
                                 boxShadow: [
@@ -401,24 +401,24 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                                 const PopupMenuItem(value: 'details', child: Row(children: [Icon(Icons.info_outline_rounded), SizedBox(width: 8), Text('Ver detalles')])),
                                 const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_rounded), SizedBox(width: 8), Text('Editar')])),
                               ],
-                              child: Container(padding: const EdgeInsets.all(8), child: Icon(Icons.more_vert_rounded, color: mediumGray)),
+                              child: Container(padding: const EdgeInsets.all(8), child: Icon(Icons.more_vert_rounded, color: textGray)),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Icon(Icons.email_rounded, size: 16, color: mediumGray),
+                            Icon(Icons.email_rounded, size: 16, color: textGray),
                             const SizedBox(width: 8),
-                            Expanded(child: Text(provider.email, style: const TextStyle(fontSize: 14, color: mediumGray), overflow: TextOverflow.ellipsis)),
+                            Expanded(child: Text(provider.email, style: const TextStyle(fontSize: 14, color: textGray), overflow: TextOverflow.ellipsis)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.phone_rounded, size: 16, color: mediumGray),
+                            Icon(Icons.phone_rounded, size: 16, color: textGray),
                             const SizedBox(width: 8),
-                            Text(provider.phone, style: const TextStyle(fontSize: 14, color: mediumGray)),
+                            Text(provider.phone, style: const TextStyle(fontSize: 14, color: textGray)),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -470,7 +470,7 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? color : mediumGray,
+        color: isActive ? color : textGray,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -503,10 +503,10 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: secondaryBlue.withValues(alpha: 0.1),
+                          color: primaryDarkBlue.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.business_rounded, color: secondaryBlue, size: 24),
+                        child: const Icon(Icons.business_rounded, color: primaryDarkBlue, size: 24),
                       ),
                       const SizedBox(width: 16),
                       const Text('Gestión de Proveedores', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkGray)),
@@ -530,8 +530,8 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                           },
                           decoration: InputDecoration(
                             hintText: 'Buscar proveedores...',
-                            prefixIcon: Icon(Icons.search_rounded, color: mediumGray),
-                            suffixIcon: searchQuery.isNotEmpty ? IconButton(icon: Icon(Icons.clear_rounded, color: mediumGray), onPressed: () { _searchController.clear(); searchQuery = ''; _filterProviders(); }) : null,
+                            prefixIcon: Icon(Icons.search_rounded, color: textGray),
+                            suffixIcon: searchQuery.isNotEmpty ? IconButton(icon: Icon(Icons.clear_rounded, color: textGray), onPressed: () { _searchController.clear(); searchQuery = ''; _filterProviders(); }) : null,
                             filled: true,
                             fillColor: lightGray,
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -566,13 +566,13 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
                           Container(
                             width: 80,
                             height: 80,
-                            decoration: BoxDecoration(color: mediumGray.withValues(alpha: 0.1), shape: BoxShape.circle),
-                            child: Icon(searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.business_rounded, size: 40, color: mediumGray),
+                            decoration: BoxDecoration(color: textGray.withValues(alpha: 0.1), shape: BoxShape.circle),
+                            child: Icon(searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.business_rounded, size: 40, color: textGray),
                           ),
                           const SizedBox(height: 20),
                           Text(
                             searchQuery.isNotEmpty ? 'No se encontraron proveedores' : 'No hay proveedores registrados',
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: mediumGray),
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textGray),
                           ),
                         ],
                       ),
@@ -589,3 +589,5 @@ class _ProvidersManagementScreenState extends State<ProvidersManagementScreen>
     );
   }
 }
+
+

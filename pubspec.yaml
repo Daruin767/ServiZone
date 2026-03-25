@@ -10,18 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # ------------------- GESTIÓN DE ESTADO -------------------
-  flutter_bloc: ^8.1.6
-  bloc: ^8.1.4
-  
   # ------------------- INYECCIÓN DE DEPENDENCIAS -------------------
   get_it: ^7.7.0
-  
-  # ------------------- NAVEGACIÓN -------------------
-  go_router: ^14.2.7
-  
-  # ------------------- PETICIONES HTTP -------------------
-  dio: ^5.5.0+1
   
   # ------------------- ALMACENAMIENTO LOCAL -------------------
   shared_preferences: ^2.2.3
@@ -36,23 +26,12 @@ dependencies:
   # ------------------- GEOLOCALIZACIÓN -------------------
   geolocator: ^12.0.0
   geocoding: ^3.0.0
-  google_maps_flutter: ^2.7.0
-  
-  # ------------------- CALENDARIO -------------------
-  table_calendar: ^3.1.2
   
   # ------------------- FECHAS -------------------
   intl: ^0.20.2
   
-  # ------------------- VALIDACIÓN -------------------
-  form_validator: ^2.1.1
-  
-  # ------------------- IMÁGENES -------------------
-  cached_network_image: ^3.3.1
-  
   # ------------------- ÍCONOS -------------------
   cupertino_icons: ^1.0.8
-  font_awesome_flutter: ^10.7.0
   url_launcher: ^6.3.1
   flutter_localizations:
     sdk: flutter
@@ -64,7 +43,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
-  assets:
-    - assets/images/
-    - assets/icons/
