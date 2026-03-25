@@ -250,7 +250,6 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                           const SizedBox(height: 20),
                           _buildEditableField('Años de experiencia', _userExperience, _experienceController, TextInputType.number),
                           const SizedBox(height: 20),
-                          _buildInfoRow('Requerimientos adicionales', _userAdditionalReqs, isReadOnly: true),
                           
                           const SizedBox(height: 24),
                           if (_isEditing)

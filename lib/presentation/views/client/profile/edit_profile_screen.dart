@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 
@@ -12,13 +11,17 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
 
   String _userName = 'Usuario';
-  bool _isLoading = false;
+  String _userLastName = '';
+  String _userEmail = '';
+  String _userPhone = '';
 
-  // Estados para los modales
+  bool _isEditing = false;
+  bool _isLoading = false;
   bool _showSuccess = false;
   bool _showError = false;
   String _errorMessage = 'Error al actualizar';
@@ -26,56 +29,72 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+    if (mounted) {
       setState(() {
-        _userName = name;
+        _userName = prefs.getString('user_name') ?? 'Usuario';
+        _userLastName = prefs.getString('user_lastname') ?? '';
+        _userEmail = prefs.getString('user_email') ?? '';
+        _userPhone = prefs.getString('user_phone') ?? '';
+
+        _emailController.text = _userEmail;
+        _phoneController.text = _userPhone;
       });
     }
   }
 
   String _getInitials(String name) {
-    List<String> parts = name.trim().split(' ');
-    if (parts.isEmpty) return 'U';
+    String trimmed = name.trim();
+    if (trimmed.isEmpty) return 'U';
+    List<String> parts = trimmed.split(' ');
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+    return (parts[0].substring(0, 1) + (parts[1].isNotEmpty ? parts[1].substring(0, 1) : '')).toUpperCase();
   }
 
-
-
   Future<void> _updateData() async {
-    // Validar con el form (los validadores ya mostrarán SnackBar)
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     // Simular proceso de actualización
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
-    // Simular éxito/error aleatorio para demostración
+    // Simular éxito/error aleatorio (para demostración)
     final random = DateTime.now().millisecondsSinceEpoch % 2;
     if (random == 0) {
-      // Éxito
+      // Guardar en SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_email', _emailController.text);
+      await prefs.setString('user_phone', _phoneController.text);
+
       setState(() {
         _isLoading = false;
+        _isEditing = false;
+        _userEmail = _emailController.text;
+        _userPhone = _phoneController.text;
         _showSuccess = true;
       });
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _showSuccess = false);
-          Navigator.pop(context);
-        }
+        if (mounted) setState(() => _showSuccess = false);
       });
     } else {
-      // Error
       setState(() {
         _isLoading = false;
         _showError = true;
+        _errorMessage = 'No se pudo actualizar la información';
       });
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => _showError = false);
@@ -86,24 +105,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2), // Fondo gris claro de pantalla
+      backgroundColor: const Color(0xFFF2F2F2),
       body: Stack(
         children: [
           Column(
             children: [
-              // Header blanco de 80px
+              // Header con avatar, nombre y botón Volver azul
               Container(
                 height: 80,
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    // Avatar circular
                     Container(
                       width: 45,
                       height: 45,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFE0E0E0), // gris claro
+                        color: Color(0xFFE0E0E0),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -119,7 +137,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Nombre con @
                     Text(
                       '@$_userName',
                       style: const TextStyle(
@@ -130,7 +147,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // Botón Volver con fondo azul
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
@@ -155,7 +171,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
 
-              // Contenedor principal con fondo blanco (tarjeta)
+              // Contenido principal
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -178,12 +194,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Título "Editar información" con icono
+                          // Título
                           Row(
                             children: [
                               Text(
-                                'Editar información',
-                                style: TextStyle(
+                                _isEditing ? 'Editar información' : 'Información personal',
+                                style: const TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 22,
                                   fontWeight: FontWeight.w500,
@@ -192,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                               const SizedBox(width: 8),
                               Icon(
-                                Icons.edit,
+                                _isEditing ? Icons.edit : Icons.person,
                                 size: 20,
                                 color: Colors.grey[600],
                               ),
@@ -200,116 +216,117 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Campo Correo electrónico
-                          Text(
-                            'Correo electrónico',
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: darkGray,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100], // fondo gris claro
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: _emailController,
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                color: darkGray,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'ejemplo@correo.com',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 14,
-                                  color: textGray,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'El correo electrónico es obligatorio';
-                                }
-                                if (!value.contains('@')) {
-                                  return 'Ingresa un correo electrónico válido';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
+                          // Nombre (siempre solo lectura)
+                          _buildInfoRow('Nombre', _userName, isReadOnly: true),
+                          const SizedBox(height: 20),
 
-                          const SizedBox(height: 16),
+                          // Apellido (siempre solo lectura)
+                          _buildInfoRow('Apellido', _userLastName.isNotEmpty ? _userLastName : 'No especificado', isReadOnly: true),
+                          const SizedBox(height: 20),
 
-                          // Teléfono
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2))],
-                            ),
-                            child: TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(
-                                hintText: 'Número de celular',
-                                prefixIcon: Icon(Icons.phone_rounded, color: textGray),
-                                border: InputBorder.none,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'El número de celular es obligatorio';
-                                }
-                                if (value.length < 10) {
-                                  return 'El celular debe tener al menos 10 dígitos';
-                                }
-                                return null;
-                              },
-                            ),
+                          // Correo electrónico (editable solo en modo edición)
+                          _buildEditableField(
+                            label: 'Correo electrónico',
+                            value: _userEmail,
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            isEditing: _isEditing,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Número de celular (editable solo en modo edición)
+                          _buildEditableField(
+                            label: 'Número de celular',
+                            value: _userPhone,
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            isEditing: _isEditing,
                           ),
 
                           const SizedBox(height: 32),
 
-                          // Botón principal
-                          SizedBox(
-                            width: double.infinity,
-                            height: 54,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _updateData,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryBlue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5,
+                          // Botones según modo
+                          if (_isEditing)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _isEditing = false;
+                                        // Restaurar valores originales
+                                        _emailController.text = _userEmail;
+                                        _phoneController.text = _userPhone;
+                                      });
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                    )
-                                  : const Text(
-                                      'Actualizar datos',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      side: const BorderSide(color: textGray),
+                                    ),
+                                    child: const Text(
+                                      'Cancelar',
+                                      style: TextStyle(color: textGray, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading ? null : _updateData,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryBlue,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                        : const Text(
+                                      'Guardar',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() => _isEditing = true);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryBlue,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Editar información personal',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -334,15 +351,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
 
-          // Modal de éxito
+          // Modales
           if (_showSuccess)
             _buildModal(
               icon: Icons.check_circle,
               color: Colors.green,
               message: 'Datos actualizados',
             ),
-
-          // Modal de error
           if (_showError)
             _buildModal(
               icon: Icons.cancel,
@@ -351,6 +366,91 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {bool isReadOnly = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: textGray,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            color: isReadOnly ? Colors.grey.shade600 : darkGray,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditableField({
+    required String label,
+    required String value,
+    required TextEditingController controller,
+    required TextInputType keyboardType,
+    required bool isEditing,
+    int maxLines = 1,
+  }) {
+    if (!isEditing) {
+      return _buildInfoRow(label, value);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: textGray,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          style: const TextStyle(
+            fontSize: 16,
+            color: darkGray,
+          ),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: primaryBlue),
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+          ),
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return 'Campo requerido';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 
@@ -368,11 +468,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 70,
-                color: color,
-              ),
+              Icon(icon, size: 70, color: color),
               const SizedBox(height: 20),
               Text(
                 message,
@@ -391,5 +487,3 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
-
-
