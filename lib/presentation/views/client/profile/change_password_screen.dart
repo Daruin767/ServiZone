@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -35,12 +36,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _loadUserData();
   }
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserData() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = "${data['nombre'] ?? data['Nombre'] ?? ''} ${data['apellido'] ?? data['Apellido'] ?? ''}".trim();
+        if (_userName.isEmpty) {
+          _userName = 'Usuario Cliente';
+        }
       });
     }
   }
@@ -139,15 +142,27 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
 
-    // Simular cambio de contraseña
+    // Cambio de contraseña real con el backend
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
 
-    // Simular éxito/error aleatorio
-    final random = DateTime.now().millisecondsSinceEpoch % 2;
+    final payload = {
+      'ContrasenaActual': _currentPasswordController.text,
+      'Contrasena': newPwd,
+    };
+
+    final role = locator<AuthService>().currentRole;
+    Map<String, dynamic> result;
+    
+    if (role == 'proveedor') {
+      result = await locator<AuthService>().updatePerfilProveedor(payload);
+    } else {
+      result = await locator<AuthService>().updatePerfilCliente(payload);
+    }
+
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (random == 0) {
+    if (result['success'] == true) {
       setState(() => _showSuccess = true);
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
@@ -158,7 +173,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     } else {
       setState(() {
         _showError = true;
-        _errorMessage = 'Error al cambiar';
+        _errorMessage = result['message'] ?? 'Error al cambiar la contraseña';
       });
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => _showError = false);
@@ -204,7 +219,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(width: 12),
                     // Nombre con @
                     Text(
-                      '@$_userName',
+                      '$_userName',
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 18,

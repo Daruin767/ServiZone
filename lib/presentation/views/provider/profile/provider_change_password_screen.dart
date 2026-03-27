@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
 import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
@@ -39,12 +40,14 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
     _loadUserData();
   }
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserData() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = "${data['nombre'] ?? data['Nombre'] ?? ''} ${data['apellido'] ?? data['Apellido'] ?? ''}".trim();
+        if (_userName.isEmpty) {
+          _userName = 'Usuario Proveedor';
+        }
       });
     }
   }
@@ -146,8 +149,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await locator<AuthService>().logout();
     if (mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
@@ -189,7 +191,7 @@ class _ProviderChangePasswordScreenState extends State<ProviderChangePasswordScr
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '@$_userName',
+                      '$_userName',
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 18,

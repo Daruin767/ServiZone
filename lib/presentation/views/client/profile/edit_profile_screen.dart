@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -41,14 +42,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
+  void _loadUserData() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (mounted && data != null) {
       setState(() {
-        _userName = prefs.getString('user_name') ?? 'Usuario';
-        _userLastName = prefs.getString('user_lastname') ?? '';
-        _userEmail = prefs.getString('user_email') ?? '';
-        _userPhone = prefs.getString('user_phone') ?? '';
+        _userName = data['nombre'] ?? data['Nombre'] ?? 'Usuario';
+        _userLastName = data['apellido'] ?? data['Apellido'] ?? '';
+        _userEmail = data['correo'] ?? data['Correo'] ?? '';
+        _userPhone = data['celular'] ?? data['Celular'] ?? '';
 
         _emailController.text = _userEmail;
         _phoneController.text = _userPhone;
@@ -69,36 +70,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simular proceso de actualización
-    await Future.delayed(const Duration(seconds: 1));
+    final result = await locator<AuthService>().updatePerfilCliente({
+      'correo': _emailController.text.trim(),
+      'celular': _phoneController.text.trim(),
+    });
 
-    // Simular éxito/error aleatorio (para demostración)
-    final random = DateTime.now().millisecondsSinceEpoch % 2;
-    if (random == 0) {
-      // Guardar en SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', _emailController.text);
-      await prefs.setString('user_phone', _phoneController.text);
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (result['success']) {
+        setState(() {
+          _isEditing = false;
+          _userEmail = _emailController.text.trim();
+          _userPhone = _phoneController.text.trim();
+          _showSuccess = true;
+        });
+        
+        // Recargar datos desde el perfil para asegurar consistencia
+        _loadUserData();
 
-      setState(() {
-        _isLoading = false;
-        _isEditing = false;
-        _userEmail = _emailController.text;
-        _userPhone = _phoneController.text;
-        _showSuccess = true;
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _showSuccess = false);
-      });
-    } else {
-      setState(() {
-        _isLoading = false;
-        _showError = true;
-        _errorMessage = 'No se pudo actualizar la información';
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _showError = false);
-      });
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) setState(() => _showSuccess = false);
+        });
+      } else {
+        // Solo redirigir al login si el error es 401 Unauthorized (token expirado y refresh falló)
+        if (result['statusCode'] == 401) {
+          // El ApiClient ya disparó onSessionExpired, pero podemos forzar navegación si es necesario
+          return;
+        }
+
+        setState(() {
+          _showError = true;
+          _errorMessage = result['message'] ?? 'Error al actualizar la información';
+        });
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) setState(() => _showError = false);
+        });
+      }
     }
   }
 
@@ -138,7 +145,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '@$_userName',
+                      '$_userName',
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 18,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
 import 'package:servizone_app/presentation/views/provider/services/provider_services_screen.dart';
@@ -58,17 +59,16 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
+  void _loadUserData() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (mounted && data != null) {
       setState(() {
-        _userName = prefs.getString('user_name') ?? 'Usuario';
-        _userLastName = prefs.getString('user_last_name') ?? 'Apellido';
-        _userEmail = prefs.getString('user_email') ?? 'proveedor@ejemplo.com';
-        _userPhone = prefs.getString('user_phone') ?? '+57 300 000 0000';
-        _userDescription = prefs.getString('user_description') ?? 'Especialista en servicios del hogar con alta atención al detalle.';
-        _userExperience = prefs.getString('user_experience') ?? '5';
-        _userAdditionalReqs = prefs.getString('user_additional_reqs') ?? 'Ninguno';
+        _userName = data['nombre'] ?? data['Nombre'] ?? 'Usuario';
+        _userLastName = data['apellido'] ?? data['Apellido'] ?? '';
+        _userEmail = data['correo'] ?? data['Correo'] ?? '';
+        _userPhone = data['celular'] ?? data['Celular'] ?? '';
+        _userDescription = data['descripcionPerfil'] ?? data['DescripcionPerfil'] ?? 'Sin descripción';
+        _userExperience = data['anosExperiencia']?.toString() ?? data['AnosExperiencia']?.toString() ?? '0';
 
         _emailController.text = _userEmail;
         _phoneController.text = _userPhone;
@@ -87,38 +87,50 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
 
   Future<void> _updateData() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(seconds: 1));
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_email', _emailController.text);
-    await prefs.setString('user_phone', _phoneController.text);
-    await prefs.setString('user_description', _descriptionController.text);
-    await prefs.setString('user_experience', _experienceController.text);
+    final result = await locator<AuthService>().updatePerfilProveedor({
+      'correo': _emailController.text.trim(),
+      'celular': _phoneController.text.trim(),
+      'descripcionPerfil': _descriptionController.text.trim(),
+      'anosExperiencia': int.tryParse(_experienceController.text.trim()) ?? 0,
+    });
 
     if (mounted) {
-      setState(() {
-        _isLoading = false;
-        _isEditing = false;
-        _userEmail = _emailController.text;
-        _userPhone = _phoneController.text;
-        _userDescription = _descriptionController.text;
-        _userExperience = _experienceController.text;
-        _showSuccess = true;
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _showSuccess = false);
-        }
-      });
+      setState(() => _isLoading = false);
+      if (result['success']) {
+        setState(() {
+          _isEditing = false;
+          _userEmail = _emailController.text.trim();
+          _userPhone = _phoneController.text.trim();
+          _userDescription = _descriptionController.text.trim();
+          _userExperience = _experienceController.text.trim();
+          _showSuccess = true;
+        });
+
+        // Recargar datos para consistencia
+        _loadUserData();
+
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) setState(() => _showSuccess = false);
+        });
+      } else {
+        // Ignorar 401 si ya se maneja globalmente
+        if (result['statusCode'] == 401) return;
+
+        setState(() {
+          _showError = true;
+          _errorMessage = result['message'] ?? 'Error al actualizar la información';
+        });
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) setState(() => _showError = false);
+        });
+      }
     }
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await locator<AuthService>().logout();
     if (mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }

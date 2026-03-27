@@ -74,7 +74,7 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
   void _navigateToHomeWithIndex(int index) {
     if (widget.isGuest) {
       // Si es invitado, no puede navegar a otras pestañas que requieran auth
-      if (index == 1) {
+      if (index == 2) {
         Navigator.pop(context);
       } else {
         _showLoginRequiredDialog();
@@ -253,20 +253,11 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         boxShadow: [BoxShadow(color: cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
       ),
       child: BottomNavigationBar(
-        currentIndex: 1,
+        currentIndex: 2,
         onTap: (index) {
           HapticFeedback.lightImpact();
-          switch (index) {
-            case 0:
-              _navigateToHomeWithIndex(0);
-              break;
-            case 1:
-              _navigateToHomeWithIndex(1);
-              break;
-            case 2:
-              _navigateToHomeWithIndex(2);
-              break;
-          }
+          if (index == 2) return;
+          _navigateToHomeWithIndex(index);
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -276,9 +267,10 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Servicios'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Cuenta'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "Reservas"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: "Solicitudes"),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Perfil"),
         ],
       ),
     );

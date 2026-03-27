@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 
 class ProviderRequestScreen extends StatefulWidget {
   const ProviderRequestScreen({super.key});
@@ -12,211 +15,216 @@ class ProviderRequestScreen extends StatefulWidget {
 
 class _ProviderRequestScreenState extends State<ProviderRequestScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  final _nameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _experienceController = TextEditingController();
-
-  bool _isSubmitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
+  
+  bool _isLoading = false;
+  final List<File> _selectedFiles = [];
+  final List<String> _allowedExtensions = ['pdf', 'doc', 'docx'];
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
     _descriptionController.dispose();
     _experienceController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
+  Future<void> _pickFiles() async {
+    if (_isLoading) return;
+    
+    HapticFeedback.lightImpact();
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: _allowedExtensions,
+      );
+
+      if (result != null && mounted) {
+        setState(() {
+          for (var path in result.paths) {
+            if (path != null) {
+              final file = File(path);
+              if (!_selectedFiles.any((f) => f.path == file.path)) {
+                _selectedFiles.add(file);
+              }
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar archivos: $e'), backgroundColor: errorRed),
+        );
+      }
+    }
+  }
+
+  void _removeFile(int index) {
     setState(() {
-      _nameController.text = prefs.getString('user_name') ?? '';
-      _lastNameController.text = prefs.getString('user_lastname') ?? '';
-      _emailController.text = prefs.getString('user_email') ?? '';
-      _phoneController.text = prefs.getString('user_phone') ?? '';
+      _selectedFiles.removeAt(index);
     });
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isSubmitting = true);
-
-      // Simular envío al servidor
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _isSubmitting = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Solicitud enviada con éxito. Un administrador revisará tu perfil.'),
-              backgroundColor: successGreen,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          Navigator.pop(context);
-        }
-      });
-    } else {
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate()) {
       HapticFeedback.vibrate();
+      return;
     }
+
+    if (_selectedFiles.isEmpty) {
+      HapticFeedback.vibrate();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Debes adjuntar al menos un archivo (PDF, DOC o DOCX)'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      final authService = locator<AuthService>();
+      final result = await authService.enviarSolicitudProveedor(
+        descripcion: _descriptionController.text.trim(),
+        // Enviando como string para que FormData lo tome como valor textual simple
+        experiencia: _experienceController.text.trim(),
+        filePaths: _selectedFiles.map((f) => f.path).toList(),
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (result['success']) {
+        _showSuccessDialog();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Error desconocido al enviar solicitud'),
+            backgroundColor: errorRed,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error inesperado: $e'), backgroundColor: errorRed),
+        );
+      }
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: successGreen, size: 30),
+            SizedBox(width: 10),
+            Text('Solicitud enviada'),
+          ],
+        ),
+        content: const Text(
+          'Tu solicitud de proveedor ha sido recibida correctamente. Nuestro equipo la revisará pronto.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: const Text('Entendido', style: TextStyle(color: primaryBlue, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Encabezado
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                      child: const Text(
-                        'ServiZone',
-                        style: TextStyle(
-                          color: primaryBlue,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryBlue,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Text('Volver'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                const Text(
-                  'Formulario de solicitud para proveedor',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 26,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF666666),
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 32),
+      backgroundColor: backgroundGray,
+      appBar: AppBar(
+        title: const Text('Ser Proveedor', style: TextStyle(color: textGray, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: primaryBlue),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Completa tu perfil profesional',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textGray),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Cuéntanos sobre tu experiencia para que podamos validar tu cuenta de proveedor.',
+                style: TextStyle(fontSize: 14, color: textGray),
+              ),
+              const SizedBox(height: 32),
 
-                // Nombre
-                _buildLabel('Nombre'),
-                const SizedBox(height: 8),
-                _buildTextField(_nameController, hint: 'Tu nombre'),
+              _buildLabel('Descripción profesional'),
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 4,
+                decoration: _inputDecoration('Ej: Especialista en limpieza profunda con técnicas ecológicas...'),
+                validator: (v) => (v == null || v.trim().length < 20) ? 'Mínimo 20 caracteres' : null,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Años de experiencia'),
+              TextFormField(
+                controller: _experienceController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: _inputDecoration('Ej: 5'),
+                validator: (v) => (v == null || v.isEmpty) ? 'Requerido' : null,
+              ),
+              const SizedBox(height: 32),
+
+              _buildLabel('Documentos de soporte (PDF, DOC, DOCX)'),
+              const SizedBox(height: 8),
+              _buildFilePicker(),
+              
+              if (_selectedFiles.isNotEmpty) ...[
                 const SizedBox(height: 16),
-
-                // Apellido
-                _buildLabel('Apellido'),
-                const SizedBox(height: 8),
-                _buildTextField(_lastNameController, hint: 'Tu apellido'),
-                const SizedBox(height: 16),
-
-                // Correo
-                _buildLabel('Correo electrónico'),
-                const SizedBox(height: 8),
-                _buildTextField(_emailController,
-                    hint: 'ejemplo@correo.com',
-                    keyboardType: TextInputType.emailAddress),
-                const SizedBox(height: 16),
-
-                // Teléfono
-                _buildLabel('Número de celular'),
-                const SizedBox(height: 8),
-                _buildTextField(_phoneController,
-                    hint: '+57 300 123 4567', keyboardType: TextInputType.phone),
-                const SizedBox(height: 16),
-
-                // Descripción
-                _buildLabel('Descripción profesional'),
-                const SizedBox(height: 8),
-                _buildTextArea(),
-                const SizedBox(height: 16),
-
-                // Años de experiencia
-                _buildLabel('Años de experiencia'),
-                const SizedBox(height: 8),
-                _buildNumericField(),
-                const SizedBox(height: 24),
-
-                // Certificaciones (opcional)
-                _buildLabel('Certificaciones (opcional)'),
-                const SizedBox(height: 8),
-                _buildUploadArea(),
-                const SizedBox(height: 48),
-
-                // Botones
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: const BorderSide(color: textGray),
-                        ),
-                        child: const Text('Cancelar'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryBlue,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : const Text('Enviar solicitud'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
+                _buildFileList(),
               ],
-            ),
+
+              const SizedBox(height: 48),
+
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submitRequest,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Enviar Solicitud', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -224,154 +232,89 @@ class _ProviderRequestScreenState extends State<ProviderRequestScreen> {
   }
 
   Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontFamily: 'Roboto',
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: textGray,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textGray),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller,
-      {String hint = '', TextInputType keyboardType = TextInputType.text}) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.all(16),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        borderSide: BorderSide(color: Colors.grey.shade300),
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        style: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 14,
-          color: darkGray,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14,
-            color: textGray.withOpacity(0.5),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-        validator: (value) =>
-        value == null || value.trim().isEmpty ? 'Campo requerido' : null,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: primaryBlue, width: 2),
       ),
     );
   }
 
-  Widget _buildTextArea() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: TextFormField(
-        controller: _descriptionController,
-        maxLines: 4,
-        style: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 14,
-          color: darkGray,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Cuéntanos sobre tu experiencia y habilidades...',
-          hintStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14,
-            color: textGray.withOpacity(0.5),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        validator: (value) =>
-        value == null || value.trim().isEmpty ? 'Campo requerido' : null,
-      ),
-    );
-  }
-
-  Widget _buildNumericField() {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: TextFormField(
-        controller: _experienceController,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 14,
-          color: darkGray,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Ej. 5',
-          hintStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14,
-            color: textGray.withOpacity(0.5),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-        validator: (value) =>
-        value == null || value.trim().isEmpty ? 'Campo requerido' : null,
-      ),
-    );
-  }
-
-  Widget _buildUploadArea() {
-    return Container(
-      width: double.infinity,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Funcionalidad de carga de archivos simulada'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
+  Widget _buildFilePicker() {
+    return InkWell(
+      onTap: _pickFiles,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          border: Border.all(color: primaryBlue.withOpacity(0.5), style: BorderStyle.solid),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.cloud_upload_outlined, size: 40, color: primaryBlue.withOpacity(0.7)),
+            const SizedBox(height: 12),
+            const Text('Seleccionar archivos', style: TextStyle(color: primaryBlue, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('PDF, DOC o DOCX', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileList() {
+    return Column(
+      children: List.generate(_selectedFiles.length, (index) {
+        final file = _selectedFiles[index];
+        final name = file.path.split('/').last.split('\\').last;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
             children: [
-              Icon(Icons.cloud_upload_outlined, size: 32, color: primaryBlue),
-              SizedBox(height: 8),
-              Text(
-                'Cargar certificaciones (PDF, imágenes)',
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 14,
-                  color: primaryBlue,
-                  fontWeight: FontWeight.w500,
-                ),
+              const Icon(Icons.description_outlined, color: primaryBlue, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(name, style: const TextStyle(fontSize: 14), overflow: TextOverflow.ellipsis),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, color: errorRed, size: 20),
+                onPressed: () => _removeFile(index),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

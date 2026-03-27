@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/presentation/views/client/profile/edit_profile_screen.dart';
@@ -25,12 +26,14 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     _loadUserName();
   }
 
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserName() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = "${data['nombre'] ?? data['Nombre'] ?? ''} ${data['apellido'] ?? data['Apellido'] ?? ''}".trim();
+        if (_userName.isEmpty) {
+          _userName = 'Usuario Cliente';
+        }
       });
     }
   }
@@ -105,7 +108,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '@$_userName',
+                    '$_userName',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -223,9 +226,73 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
             _buildActionButton(
               title: 'Cambiar a proveedor',
               color: primaryBlue,
-              onTap: () {
+              onTap: () async {
                 HapticFeedback.lightImpact();
-                Navigator.pushNamed(context, AppRoutes.providerRequest);
+                
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator(color: primaryBlue)),
+                );
+
+                final authService = locator<AuthService>();
+                // Intentar cambio de rol directamente
+                final result = await authService.switchRole('proveedor');
+                
+                if (!mounted) return;
+                Navigator.pop(context); // Cerrar loading
+                
+                if (result['success'] == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Sesión cambiada a Proveedor')),
+                  );
+                  Navigator.pushReplacementNamed(context, AppRoutes.providerHome);
+                } else {
+                  final int code = result['statusCode'] ?? 0;
+                  final String msg = (result['message'] ?? '').toLowerCase();
+                  final String body = (result['body'] ?? '').toLowerCase();
+
+                  if (code == 401) {
+                    widget.onLogout();
+                    return;
+                  }
+
+                  // Solo redirigir al formulario si el backend indica que no tiene el rol
+                  // Un error 400 o 403 con mensaje de "no tiene rol" o "no es proveedor"
+                  bool isNotProviderError = msg.contains('no tiene rol') || 
+                                            msg.contains('no es proveedor') || 
+                                            msg.contains('not a provider') ||
+                                            body.contains('not_provider');
+
+                  // Si no está aprobado pero YA ES proveedor (rol asignado pero no activo),
+                  // el backend suele dar un mensaje de "pendiente" o "revisión".
+                  bool isPendingApproval = msg.contains('en revisión') || 
+                                          msg.contains('pendiente') ||
+                                          msg.contains('no está aprobado') ||
+                                          msg.contains('no esta aprobado') ||
+                                          body.contains('not_approved');
+
+                  if ((code == 403 || code == 400) && isNotProviderError) {
+                    // Redirigir al formulario solo si NO tiene el rol en absoluto
+                    Navigator.pushNamed(context, AppRoutes.providerRequest);
+                  } else if (isPendingApproval) {
+                    // Mostrar mensaje de que está en revisión, no mostrar formulario de nuevo
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result['message'] ?? 'Tu solicitud de proveedor está en revisión.'), 
+                        backgroundColor: warningOrange,
+                      ),
+                    );
+                  } else {
+                    // Otros errores (500, red, etc.)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result['message'] ?? 'Error al cambiar de rol'), 
+                        backgroundColor: errorRed,
+                      ),
+                    );
+                  }
+                }
               },
             ),
 

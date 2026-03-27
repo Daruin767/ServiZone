@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
@@ -18,32 +19,36 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkSession() async {
-    // Simular tiempo de carga
-    await Future.delayed(const Duration(seconds: 2));
-
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+    // Evitar que la pantalla parpadee muy rápido si el backend responde ultra rápido
+    final minDelay = Future.delayed(const Duration(seconds: 1));
+    
+    final authService = locator<AuthService>();
+    final isLoggedIn = await authService.autoLogin();
+    
+    await minDelay;
 
     if (!mounted) return;
 
     if (isLoggedIn) {
-      // Obtener el rol guardado
-      final role = prefs.getString('user_role') ?? '';
+      // Obtener el rol validado
+      final role = authService.currentRole ?? '';
       switch (role) {
         case 'admin':
           Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
           break;
-        case 'client':
+        case 'cliente':
+        case 'client': // por si acaso
           Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
           break;
-        case 'provider':
+        case 'proveedor':
+        case 'provider': // por si acaso
           Navigator.pushReplacementNamed(context, AppRoutes.providerHome);
           break;
         default:
           Navigator.pushReplacementNamed(context, AppRoutes.login);
       }
     } else {
-      // No hay sesión, ir al login
+      // No hay sesión válida, ir al login
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }

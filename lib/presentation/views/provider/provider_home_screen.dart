@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
@@ -27,21 +28,19 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
     _loadUserName();
   }
 
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserName() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = data['nombre'] ?? data['Nombre'] ?? 'Usuario Proveedor';
       });
     }
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await locator<AuthService>().logout();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
     }
   }
 
@@ -108,7 +107,7 @@ class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
               color: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               child: Text(
-                'Bienvenido, @$_userName!',
+                'Bienvenido, $_userName!',
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),

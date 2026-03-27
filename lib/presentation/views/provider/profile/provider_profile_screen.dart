@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/provider_bookings_screen.dart';
 import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
@@ -31,12 +32,14 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     _loadUserName();
   }
 
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserName() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = "${data['nombre'] ?? data['Nombre'] ?? ''} ${data['apellido'] ?? data['Apellido'] ?? ''}".trim();
+        if (_userName.isEmpty) {
+          _userName = 'Usuario Proveedor';
+        }
       });
     }
   }
@@ -65,15 +68,37 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx); // cerrar diálogo
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('user_role', 'client');
-              if (mounted) {
+              
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator(color: primaryBlue)),
+              );
+
+              final result = await locator<AuthService>().switchRole('cliente');
+              
+              if (!mounted) return;
+              Navigator.pop(context); // cerrar loading
+
+              if (result['success'] == true) {
                 // Limpiar pila y navegar a cliente
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const HomeClientScreen()),
                   (route) => false,
                 );
+              } else {
+                if (result['statusCode'] == 401) {
+                  widget.onLogout();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result['message'] ?? 'Error al cambiar de rol'), 
+                      backgroundColor: errorRed,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

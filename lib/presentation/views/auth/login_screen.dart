@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,25 +30,6 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
-  // Usuarios quemados para autenticación local
-  final Map<String, Map<String, String>> _users = {
-    'admin@servizone.com': {
-      'password': '123456',
-      'role': 'admin',
-      'name': 'Administrador',
-    },
-    'cliente@servizone.com': {
-      'password': '123456',
-      'role': 'client',
-      'name': 'Cliente Demo',
-    },
-    'proveedor@servizone.com': {
-      'password': '123456',
-      'role': 'provider',
-      'name': 'Proveedor Demo',
-    },
-  };
 
   @override
   void initState() {
@@ -119,60 +102,41 @@ class _LoginScreenState extends State<LoginScreen>
     }
     setState(() => loading = true);
 
-    // Simular retardo de red
-    await Future.delayed(const Duration(seconds: 1));
-
     final email = correoController.text.trim();
     final password = passwordController.text.trim();
 
-    if (_users.containsKey(email) && _users[email]!['password'] == password) {
-      // Autenticación exitosa
-      final userData = _users[email]!;
-      final role = userData['role']!;
-      final name = userData['name']!;
+    final result = await locator<AuthService>().login(email, password);
 
-      // Guardar datos en SharedPreferences (opcional)
-      await _saveUserData(email, name, role);
-
+    if (result['success'] == true) {
       setState(() {
         _showLoadingScreen = false;
         _showSuccessScreen = true;
       });
 
       Future.delayed(const Duration(seconds: 1), () {
-        // Redirigir según el rol
+        if (!mounted) return;
+        final role = result['role'];
         switch (role) {
           case 'admin':
             Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
             break;
+          case 'cliente':
           case 'client':
             Navigator.pushReplacementNamed(context, AppRoutes.clientHome);
             break;
+          case 'proveedor':
           case 'provider':
             Navigator.pushReplacementNamed(context, AppRoutes.providerHome);
             break;
           default:
-            Navigator.pushReplacementNamed(context, AppRoutes.guestHome);
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
         }
       });
     } else {
-      // Error de autenticación
-      _showError('Credenciales incorrectas');
+      _showError(result['message'] ?? 'Credenciales incorrectas');
     }
 
     setState(() => loading = false);
-  }
-
-  Future<void> _saveUserData(String email, String name, String role) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', email);
-      await prefs.setString('user_name', name);
-      await prefs.setString('user_role', role);
-      await prefs.setBool('is_logged_in', true);
-    } catch (e) {
-      print('Error guardando datos: $e');
-    }
   }
 
   void _showError(String message) {

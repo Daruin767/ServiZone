@@ -27,6 +27,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.handshake_rounded,
       "color": primaryBlue,
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
+      "keywords": ["mandados", "diligencias", "compras", "favor", "ayuda", "personal", "rápido"],
     },
     {
       "title": "Hogar",
@@ -34,6 +35,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.home_rounded,
       "color": const Color(0xFF2E7D32),
       "gradient": [const Color(0xFF2E7D32), const Color(0xFF4CAF50)],
+      "keywords": ["limpieza", "plomería", "electricidad", "carpintería", "pintura", "reparación", "mantenimiento", "casa", "aseo", "arreglos"],
     },
     {
       "title": "Ciclismo",
@@ -41,6 +43,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.directions_bike_rounded,
       "color": const Color(0xFFE65100),
       "gradient": [const Color(0xFFE65100), const Color(0xFFFF9800)],
+      "keywords": ["bicicleta", "bici", "reparación", "mantenimiento", "llanta", "frenos", "cadena", "taller", "mecánica"],
     },
     {
       "title": "Cuidado",
@@ -48,6 +51,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.favorite_rounded,
       "color": const Color(0xFFC2185B),
       "gradient": [const Color(0xFFC2185B), const Color(0xFFE91E63)],
+      "keywords": ["niñera", "ancianos", "enfermera", "enfermería", "cuidado", "acompañamiento", "salud", "niños", "adulto mayor"],
     },
     {
       "title": "Cuidado Personal",
@@ -55,6 +59,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.spa_rounded,
       "color": const Color(0xFF7B1FA2),
       "gradient": [const Color(0xFF7B1FA2), const Color(0xFF9C27B0)],
+      "keywords": ["belleza", "spa", "masaje", "corte", "cabello", "maquillaje", "uñas", "manicure", "pedicure", "barbería", "peluquería", "estética"],
     },
     {
       "title": "Mascotas",
@@ -62,6 +67,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
       "icon": Icons.pets_rounded,
       "color": const Color(0xFFD32F2F),
       "gradient": [const Color(0xFFD32F2F), const Color(0xFFF44336)],
+      "keywords": ["perros", "gatos", "paseo", "veterinario", "baño", "peluquería", "animales", "cuidado", "adiestramiento"],
     },
   ];
 
@@ -235,9 +241,14 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
   // Pantalla Servicios (solo visual, acciones bloqueadas)
   Widget _buildSolicitudScreen() {
-    final filteredCategories = categories
-        .where((c) => c["title"].toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
+    final filteredCategories = categories.where((category) {
+      final query = searchQuery.toLowerCase();
+      final titleMatch = category["title"].toLowerCase().contains(query);
+      final subtitleMatch = category["subtitle"].toLowerCase().contains(query);
+      final keywords = (category["keywords"] as List<String>?) ?? [];
+      final keywordMatch = keywords.any((k) => k.toLowerCase().contains(query));
+      return titleMatch || subtitleMatch || keywordMatch;
+    }).toList();
 
     return Scaffold(
       backgroundColor: lightGray,

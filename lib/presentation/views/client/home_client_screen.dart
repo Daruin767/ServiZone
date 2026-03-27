@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/data/models/booking_model.dart';
 import 'package:servizone_app/presentation/views/client/services/subcategory_screen.dart';
 import 'package:servizone_app/presentation/views/client/profile/client_profile_screen.dart';
@@ -11,7 +12,7 @@ import 'package:servizone_app/presentation/views/client/client_bookings_screen.d
 
 class HomeClientScreen extends StatefulWidget {
   final int initialIndex;
-  const HomeClientScreen({super.key, this.initialIndex = 1});
+  const HomeClientScreen({super.key, this.initialIndex = 2});
 
   @override
   State<HomeClientScreen> createState() => _HomeClientScreenState();
@@ -21,6 +22,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
     with TickerProviderStateMixin {
   late int _currentIndex;
   String searchQuery = "";
+  final TextEditingController _searchController = TextEditingController();
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -34,6 +36,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.handshake_rounded,
       "color": primaryBlue,
       "gradient": [const Color(0xFF1A237E), const Color(0xFF3F51B5)],
+      "keywords": ["mandados", "diligencias", "compras", "favor", "ayuda", "personal", "rápido"],
     },
     {
       "title": "Hogar",
@@ -41,6 +44,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.home_rounded,
       "color": const Color(0xFF2E7D32),
       "gradient": [const Color(0xFF2E7D32), const Color(0xFF4CAF50)],
+      "keywords": ["limpieza", "plomería", "electricidad", "carpintería", "pintura", "reparación", "mantenimiento", "casa", "aseo", "arreglos"],
     },
     {
       "title": "Ciclismo",
@@ -48,6 +52,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.directions_bike_rounded,
       "color": const Color(0xFFE65100),
       "gradient": [const Color(0xFFE65100), const Color(0xFFFF9800)],
+      "keywords": ["bicicleta", "bici", "reparación", "mantenimiento", "llanta", "frenos", "cadena", "taller", "mecánica"],
     },
     {
       "title": "Cuidado",
@@ -55,6 +60,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.favorite_rounded,
       "color": const Color(0xFFC2185B),
       "gradient": [const Color(0xFFC2185B), const Color(0xFFE91E63)],
+      "keywords": ["niñera", "ancianos", "enfermera", "enfermería", "cuidado", "acompañamiento", "salud", "niños", "adulto mayor"],
     },
     {
       "title": "Cuidado Personal",
@@ -62,6 +68,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.spa_rounded,
       "color": const Color(0xFF7B1FA2),
       "gradient": [const Color(0xFF7B1FA2), const Color(0xFF9C27B0)],
+      "keywords": ["belleza", "spa", "masaje", "corte", "cabello", "maquillaje", "uñas", "manicure", "pedicure", "barbería", "peluquería", "estética"],
     },
     {
       "title": "Mascotas",
@@ -69,6 +76,7 @@ class _HomeClientScreenState extends State<HomeClientScreen>
       "icon": Icons.pets_rounded,
       "color": const Color(0xFFD32F2F),
       "gradient": [const Color(0xFFD32F2F), const Color(0xFFF44336)],
+      "keywords": ["perros", "gatos", "paseo", "veterinario", "baño", "peluquería", "animales", "cuidado", "adiestramiento"],
     },
   ];
 
@@ -99,14 +107,14 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await locator<AuthService>().logout();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
     }
   }
 
@@ -156,10 +164,10 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      _buildServiciosScreen(), // 0: Servicios
+      _buildReservasScreen(),  // 0: Reservas
       _buildSolicitudesTab(),  // 1: Solicitudes
-      _buildReservasScreen(),  // 2: Reservas
-      _buildAccountScreen(),   // 3: Cuenta
+      _buildServiciosScreen(), // 2: Servicios
+      _buildAccountScreen(),   // 3: Perfil
     ];
 
     return Scaffold(
@@ -203,10 +211,10 @@ class _HomeClientScreenState extends State<HomeClientScreen>
         unselectedLabelStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500, fontSize: 12),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: "Solicitudes"),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: "Reservas"),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Cuenta"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: "Solicitudes"),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Servicios"),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: "Perfil"),
         ],
       ),
     );
@@ -265,9 +273,12 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   // Pantalla Servicios (categorías)
   Widget _buildServiciosScreen() {
     final filteredCategories = categories.where((category) {
-      final titleMatch = category["title"].toLowerCase().contains(searchQuery.toLowerCase());
-      final subtitleMatch = category["subtitle"].toLowerCase().contains(searchQuery.toLowerCase());
-      return titleMatch || subtitleMatch;
+      final query = searchQuery.toLowerCase();
+      final titleMatch = category["title"].toLowerCase().contains(query);
+      final subtitleMatch = category["subtitle"].toLowerCase().contains(query);
+      final keywords = (category["keywords"] as List<String>?) ?? [];
+      final keywordMatch = keywords.any((k) => k.toLowerCase().contains(query));
+      return titleMatch || subtitleMatch || keywordMatch;
     }).toList();
 
     return FadeTransition(
@@ -291,17 +302,13 @@ class _HomeClientScreenState extends State<HomeClientScreen>
                           style: Theme.of(context).textTheme.displayLarge,
                           children: [
                             const TextSpan(text: "Servi", style: TextStyle(color: primaryBlue)),
-                            TextSpan(text: "Zone", style: TextStyle(color: darkGray.withValues(alpha: 0.8))),
+                            TextSpan(text: "Zone", style: TextStyle(color: darkGray)),
                           ],
                         ),
                       ),
                       Text('Tu plataforma de servicios', 
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'Roboto')),
                     ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert_rounded),
-                    onPressed: _showFilterSheet,
                   ),
                 ],
               ),
@@ -354,43 +361,45 @@ class _HomeClientScreenState extends State<HomeClientScreen>
   Widget _buildSearchBar() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 54,
+      height: 56,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.search_rounded, color: textGray),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              onChanged: (value) => setState(() => searchQuery = value),
-              onSubmitted: (value) {
-                // Aquí se podría navegar a una pantalla de resultados global
-                // Por ahora el filtrado es reactivo en el grid
-              },
-              decoration: const InputDecoration(
-                hintText: 'Buscar servicios...',
-                border: InputBorder.none,
-                hintStyle: TextStyle(color: textGray),
-              ),
+      child: Center(
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) => setState(() => searchQuery = value),
+          style: const TextStyle(fontSize: 16, color: darkGray, fontFamily: 'Roboto'),
+          decoration: InputDecoration(
+            hintText: 'Ej: Plomería, Mascotas...',
+            border: InputBorder.none,
+            hintStyle: TextStyle(color: textGray.withValues(alpha: 0.8), fontSize: 16, fontFamily: 'Roboto'),
+            prefixIcon: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(Icons.search_rounded, color: primaryBlue, size: 28),
             ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 40),
+            suffixIcon: searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.cancel_rounded, size: 22, color: textGray),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => searchQuery = "");
+                    },
+                  )
+                : null,
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
           ),
-          if (searchQuery.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.close_rounded, size: 20, color: textGray),
-              onPressed: () => setState(() => searchQuery = ""),
-            ),
-        ],
+        ),
       ),
     );
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
 import 'package:servizone_app/core/constants/app_constants.dart';
+import 'package:servizone_app/core/routes/app_routes.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -38,10 +38,6 @@ class _RegisterScreenState extends State<RegisterScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
-  static const String _baseUrl = 'http://10.1.117.214:7001';
-  static const String _apiEndpoint = '/api/User/register';
-  String get _apiUrl => '$_baseUrl$_apiEndpoint';
 
   @override
   void initState() {
@@ -106,46 +102,36 @@ class _RegisterScreenState extends State<RegisterScreen>
       _showLoadingScreen = true;
     });
 
-    try {
-      final response = await http
-          .post(
-            Uri.parse(_apiUrl),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({
-              "Nombre": _nombres.text.trim(),
-              "Apellidos": _apellidos.text.trim(),
-              "Documento": _documento.text.trim(),
-              "Celular": _celular.text.trim(),
-              "Correo": _correo.text.trim(),
-              "Contrasena": _pass.text.trim(),
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
+    final result = await locator<AuthService>().register({
+      "Nombre": _nombres.text.trim(),
+      "Apellido": _apellidos.text.trim(), // backend espera Apellido en vez de Apellidos? El prompt original dice "(Nombre, Apellido, Documento, Celular, Correo, Contrasena)"
+      "Documento": _documento.text.trim(),
+      "Celular": _celular.text.trim(),
+      "Correo": _correo.text.trim(),
+      "Contrasena": _pass.text.trim(),
+    });
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() {
-          _showLoadingScreen = false;
-          _showSuccessScreen = true;
-        });
-        Future.delayed(const Duration(seconds: 2), () {
-          if (!mounted) return;
-          Navigator.pushReplacementNamed(context, AppRoutes.login);
-        });
-        _limpiarFormulario();
-      } else {
-        _showError('Error del servidor (${response.statusCode})');
-      }
-    } on SocketException {
-      _showError('Error de conexión. Verifica tu red.');
-    } catch (e) {
-      _showError('Error inesperado: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _showLoadingScreen = false;
-        });
-      }
+    if (result['success'] == true) {
+      setState(() {
+        _showLoadingScreen = false;
+        _showSuccessScreen = true;
+      });
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      });
+      _limpiarFormulario();
+    } else {
+      _showError(result['message'] ?? 'Error del servidor');
+      setState(() {
+        _showLoadingScreen = false;
+      });
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 

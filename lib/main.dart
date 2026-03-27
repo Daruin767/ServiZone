@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:servizone_app/config/environment_config.dart';
 import 'package:servizone_app/core/routes/app_routes.dart';
 import 'package:servizone_app/core/themes/app_theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:servizone_app/core/locator.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EnvironmentConfig.load();
   setupLocator(); // Inicializar inyección de dependencias
   runApp(const ServiZoneApp());
 }

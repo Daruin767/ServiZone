@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:servizone_app/core/locator.dart';
+import 'package:servizone_app/data/providers/auth_service.dart';
 import 'package:servizone_app/core/constants/app_constants.dart';
 import 'package:servizone_app/presentation/views/provider/provider_home_screen.dart';
 import 'package:servizone_app/presentation/views/provider/profile/provider_profile_screen.dart';
@@ -49,19 +50,20 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
     _loadUserName();
   }
 
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && mounted) {
+  void _loadUserName() {
+    final data = locator<AuthService>().currentUserProfile;
+    if (data != null && mounted) {
       setState(() {
-        _userName = name;
+        _userName = "${data['nombre'] ?? data['Nombre'] ?? ''} ${data['apellido'] ?? data['Apellido'] ?? ''}".trim();
+        if (_userName.isEmpty) {
+          _userName = 'Usuario Proveedor';
+        }
       });
     }
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await locator<AuthService>().logout();
     if (mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
@@ -154,7 +156,7 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
           ),
         ),
         title: Text(
-          '@$_userName',
+          '$_userName',
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 18,
